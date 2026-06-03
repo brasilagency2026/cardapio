@@ -1,0 +1,5 @@
+[Terminal Execution Rule]
+System: Windows
+Command Prefix: cmd /c
+Always execute terminal commands using 'cmd /c' instead of raw commands or PowerShell. 
+This ensures that processes return an EOF (End of File) signal immediately upon completion and prevents the UI from freezing on "Working".
