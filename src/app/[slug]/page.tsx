@@ -5,4 +5,5 @@ export default function RestaurantRedirectPage({
 }: {
   params: { slug: string };
 }) {
-  redirect(`/menu/${params.
+  redirect(`/menu/${params.slug}/1`);
+}
