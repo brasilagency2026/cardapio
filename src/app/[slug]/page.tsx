@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 
-export default function RestaurantRedirectPage({
+export default async function RestaurantRedirectPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  redirect(`/menu/${params.slug}/1`);
+  const { slug } = await params;
+  redirect(`/menu/${slug}/1`);
 }
