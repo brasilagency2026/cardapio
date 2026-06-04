@@ -32,8 +32,9 @@ export default function PlanosPage() {
               <p className="text-neutral-500">O essencial para modernizar a experiência do seu cliente na mesa.</p>
             </div>
             
-            <div className="mb-8">
-              <span className="text-4xl font-extrabold text-neutral-900">Grátis</span>
+            <div className="mb-8 flex items-baseline gap-1">
+              <span className="text-4xl font-extrabold text-neutral-900">R$ 40</span>
+              <span className="text-neutral-500 font-medium">/mês</span>
             </div>
 
             <ul className="space-y-4 mb-8 flex-1">
