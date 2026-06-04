@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useOrganization } from "@clerk/nextjs";
+import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -13,6 +14,8 @@ import {
   CheckCircleIcon,
   AlertCircleIcon,
   ChefHatIcon,
+  QrCodeIcon,
+  ExternalLinkIcon,
 } from "lucide-react";
 import { TableStatusBadge } from "@/components/shared/table-status-badge";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
@@ -51,6 +54,67 @@ export default function DashboardPage() {
 
   const pendingOrders = activeOrders?.filter((o) => o.status === "PENDING") ?? [];
   const readyOrders = activeOrders?.filter((o) => o.status === "READY") ?? [];
+
+  const isDigitalOnly = restaurant?.plan === "DIGITAL_MENU";
+  const publicMenuUrl = restaurant ? `https://cardapio.foodpronto.com.br/${restaurant.slug}` : "#";
+
+  if (isDigitalOnly) {
+    return (
+      <div className="p-6 space-y-6 max-w-5xl mx-auto">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Olá, {restaurant?.name ?? "Restaurante"} 👋
+          </h1>
+          <p className="text-gray-500 mt-2 text-lg">
+            Seu cardápio digital está pronto para encantar seus clientes.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mt-8">
+          {/* Card Link do Cardápio */}
+          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col items-start">
+            <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mb-6">
+              <ExternalLinkIcon className="w-7 h-7 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Seu Link Exclusivo</h2>
+            <p className="text-gray-500 mb-6">
+              Este é o endereço do seu cardápio. Coloque-o na sua bio do Instagram e envie aos seus clientes.
+            </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 w-full flex items-center justify-between mb-4">
+              <span className="text-gray-900 font-medium truncate mr-4">
+                {publicMenuUrl}
+              </span>
+            </div>
+            <a
+              href={publicMenuUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-red-500 text-white px-6 py-3 rounded-full font-medium hover:bg-red-600 transition-colors w-full text-center"
+            >
+              Acessar meu Cardápio
+            </a>
+          </div>
+
+          {/* Card QR Code */}
+          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col items-start">
+            <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-6">
+              <QrCodeIcon className="w-7 h-7 text-orange-500" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">QR Code para as Mesas</h2>
+            <p className="text-gray-500 mb-6">
+              Imprima e coloque nas mesas. Seus clientes acessarão o cardápio apenas apontando a câmera do celular.
+            </p>
+            <Link
+              href="/dashboard/settings"
+              className="bg-white border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-full font-medium hover:border-orange-500 hover:text-orange-500 transition-colors w-full text-center mt-auto"
+            >
+              Baixar QR Code
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

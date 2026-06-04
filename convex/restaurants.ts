@@ -11,6 +11,7 @@ export const create = mutation({
     phone: v.optional(v.string()),
     address: v.optional(v.string()),
     city: v.optional(v.string()),
+    state: v.optional(v.string()),
     plan: v.union(v.literal("DIGITAL_MENU"), v.literal("RESTAURANT_SMART")),
   },
   handler: async (ctx, args) => {

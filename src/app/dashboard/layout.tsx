@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
+import { useOrganization, UserButton, OrganizationSwitcher } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import {
   LayoutDashboardIcon,
   TableIcon,
@@ -16,7 +18,7 @@ import {
   TagIcon,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const ALL_NAV_ITEMS = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboardIcon },
   { href: "/dashboard/tables", label: "Mesas", icon: TableIcon },
   { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingBagIcon },
@@ -27,12 +29,26 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Configurações", icon: SettingsIcon },
 ];
 
+const DIGITAL_MENU_ITEMS = [
+  { href: "/dashboard", label: "Início", icon: LayoutDashboardIcon },
+  { href: "/dashboard/menu", label: "Cardápio", icon: MenuIcon },
+  { href: "/dashboard/settings", label: "Configurações", icon: SettingsIcon },
+];
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { organization } = useOrganization();
+  const restaurant = useQuery(
+    api.restaurants.getByClerkOrg,
+    organization?.id ? { clerkOrgId: organization.id } : "skip"
+  );
+
+  const isDigitalOnly = restaurant?.plan === "DIGITAL_MENU";
+  const navItems = isDigitalOnly ? DIGITAL_MENU_ITEMS : ALL_NAV_ITEMS;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -66,7 +82,7 @@ export default function DashboardLayout({
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link

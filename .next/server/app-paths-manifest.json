@@ -1,7 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/menu/[slug]/[table]/page": "app/menu/[slug]/[table]/page.js",
-  "/kitchen/page": "app/kitchen/page.js",
-  "/waiter/page": "app/waiter/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}
+{}
