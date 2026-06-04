@@ -70,6 +70,10 @@ export default defineSchema({
     price: v.number(),
     image: v.optional(v.string()),
     gallery: v.optional(v.array(v.string())),
+    variations: v.optional(v.array(v.object({
+      name: v.string(),
+      price: v.number(),
+    }))),
     available: v.boolean(),
     featured: v.boolean(),
     preparationTime: v.optional(v.number()),  // minutos

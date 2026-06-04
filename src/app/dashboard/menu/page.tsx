@@ -16,6 +16,11 @@ export default function MenuPage() {
     description: "",
     price: "",
     categoryId: "",
+    image: null as File | null,
+    imagePreview: "",
+    variations: [] as { name: string; price: string }[],
+    variationName: "",
+    variationPrice: "",
   });
 
   const restaurant = useQuery(
@@ -60,17 +65,91 @@ export default function MenuPage() {
     if (!restaurant?._id || !productForm.name || !productForm.categoryId || !productForm.price) return;
 
     try {
+      let imageUrl = undefined;
+      
+      // Upload image if provided
+      if (productForm.image) {
+        const formData = new FormData();
+        formData.append('file', productForm.image);
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          imageUrl = url;
+        }
+      }
+
+      // Convert variations to API format
+      const variationsData = productForm.variations.map((v) => ({
+        name: v.name,
+        price: Math.round(parseFloat(v.price) * 100),
+      }));
+
       await createProduct({
         restaurantId: restaurant._id,
         categoryId: productForm.categoryId as any,
         name: productForm.name,
         description: productForm.description || undefined,
         price: Math.round(parseFloat(productForm.price) * 100),
+        image: imageUrl,
+        variations: variationsData.length > 0 ? variationsData : undefined,
       });
-      setProductForm({ name: "", description: "", price: "", categoryId: "" });
+      
+      setProductForm({
+        name: "",
+        description: "",
+        price: "",
+        categoryId: "",
+        image: null,
+        imagePreview: "",
+        variations: [],
+        variationName: "",
+        variationPrice: "",
+      });
       setShowProductModal(false);
     } catch (error) {
       console.error("Erro ao criar produto:", error);
+    }
+  };
+
+  const handleAddVariation = () => {
+    if (!productForm.variationName || !productForm.variationPrice) return;
+    
+    const newVariations = [
+      ...productForm.variations,
+      {
+        name: productForm.variationName,
+        price: productForm.variationPrice,
+      },
+    ];
+    
+    setProductForm({
+      ...productForm,
+      variations: newVariations,
+      variationName: "",
+      variationPrice: "",
+    });
+  };
+
+  const handleRemoveVariation = (index: number) => {
+    setProductForm({
+      ...productForm,
+      variations: productForm.variations.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProductForm({
+        ...productForm,
+        image: file,
+        imagePreview: URL.createObjectURL(file),
+      });
     }
   };
 
@@ -152,23 +231,44 @@ export default function MenuPage() {
                 key={product._id}
                 className="flex items-start justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{product.name}</p>
-                  {product.description && (
-                    <p className="text-sm text-gray-500 mt-1">{product.description}</p>
+                <div className="flex gap-4 flex-1">
+                  {product.image && (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    />
                   )}
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-sm text-gray-600">
-                      R$ {(product.price / 100).toFixed(2)}
-                    </span>
-                    {product.category && (
-                      <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                        {product.category.name}
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{product.name}</p>
+                    {product.description && (
+                      <p className="text-sm text-gray-500 mt-1">{product.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className="text-sm text-gray-600">
+                        R$ {(product.price / 100).toFixed(2)}
                       </span>
+                      {product.category && (
+                        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                          {product.category.name}
+                        </span>
+                      )}
+                    </div>
+                    {product.variations && product.variations.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {product.variations.map((v: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
+                          >
+                            {v.name} - R$ {(v.price / 100).toFixed(2)}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
                     <EditIcon className="w-4 h-4" />
                   </button>
@@ -293,12 +393,12 @@ export default function MenuPage() {
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   placeholder="Descreva seu produto..."
-                  rows={3}
+                  rows={2}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preço (R$) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preço Padrão (R$) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -308,6 +408,80 @@ export default function MenuPage() {
                   placeholder="Ex: 25.90"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Produto</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  {productForm.imagePreview && (
+                    <div className="mt-3 relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={productForm.imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Variações */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 mb-3">Tamanhos/Variações</h4>
+                
+                {productForm.variations.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {productForm.variations.map((variation, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{variation.name}</p>
+                          <p className="text-xs text-gray-500">R$ {parseFloat(variation.price).toFixed(2)}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVariation(index)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: Pequena"
+                    value={productForm.variationName}
+                    onChange={(e) => setProductForm({ ...productForm, variationName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Preço (R$)"
+                    value={productForm.variationPrice}
+                    onChange={(e) => setProductForm({ ...productForm, variationPrice: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddVariation}
+                    className="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    Adicionar Variação
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4">

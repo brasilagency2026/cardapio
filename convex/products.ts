@@ -125,6 +125,10 @@ export const createProduct = mutation({
     image: v.optional(v.string()),
     preparationTime: v.optional(v.number()),
     allergens: v.optional(v.array(v.string())),
+    variations: v.optional(v.array(v.object({
+      name: v.string(),
+      price: v.number(),
+    }))),
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -133,6 +137,7 @@ export const createProduct = mutation({
       ...args,
       available: true,
       featured: args.featured ?? false,
+      variations: args.variations ?? [],
       createdAt: now,
       updatedAt: now,
     });
