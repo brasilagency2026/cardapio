@@ -230,22 +230,22 @@ export default function TablesPage() {
                 )}
 
                 <div className="flex gap-2">
-                <button
-                  onClick={() => handleDownloadQr(table.number)}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <QrCodeIcon className="w-4 h-4" />
-                  QR Code
-                </button>
-                {table.status !== "FREE" && (
                   <button
-                    onClick={() => handleFreeTable(table._id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600 transition-colors"
+                    onClick={() => handleDownloadQr(table.number)}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    Liberar
+                    <QrCodeIcon className="w-4 h-4" />
+                    QR Code
                   </button>
-                )}
-              </div>
+                  {table.status !== "FREE" && (
+                    <button
+                      onClick={() => handleFreeTable(table._id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600 transition-colors"
+                    >
+                      Liberar
+                    </button>
+                  )}
+                </div>
             </div>
           ))}
         </div>
