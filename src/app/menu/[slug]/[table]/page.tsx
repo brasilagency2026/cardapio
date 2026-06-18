@@ -64,6 +64,8 @@ export default function MenuPage() {
   const featuredProducts = products?.filter((p) => p.featured && p.available);
 
   function addToCart(product: any) {
+    const unitPrice = product.price / 100;
+
     setCart((prev) => {
       const existing = prev.find((i) => i.productId === product._id);
       if (existing) {
@@ -78,7 +80,7 @@ export default function MenuPage() {
         {
           productId: product._id,
           productName: product.name,
-          unitPrice: product.price,
+          unitPrice,
           quantity: 1,
         },
       ];
@@ -120,7 +122,7 @@ export default function MenuPage() {
           productId: i.productId as any,
           productName: i.productName,
           quantity: i.quantity,
-          unitPrice: i.unitPrice,
+          unitPrice: Math.round(i.unitPrice * 100),
           notes: i.notes,
         })),
       });
@@ -307,7 +309,7 @@ export default function MenuPage() {
                         addToCart({
                           _id: item.productId,
                           name: item.productName,
-                          price: item.unitPrice,
+                          price: item.unitPrice * 100,
                         })
                       }
                       className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center"
@@ -368,7 +370,7 @@ function FeaturedCard({ product, onAdd }: { product: any; onAdd: (p: any) => voi
         <p className="text-sm font-medium text-gray-800 line-clamp-1">{product.name}</p>
         <div className="flex items-center justify-between mt-2">
           <span className="text-red-500 font-semibold text-sm">
-            {formatCurrency(product.price)}
+            {formatCurrency(product.price / 100)}
           </span>
           <button
             onClick={() => onAdd(product)}
@@ -410,7 +412,7 @@ function ProductRow({ product, onAdd }: { product: any; onAdd: (p: any) => void 
           </div>
         )}
         <div className="flex items-center justify-between mt-2">
-          <span className="font-bold text-red-500">{formatCurrency(product.price)}</span>
+          <span className="font-bold text-red-500">{formatCurrency(product.price / 100)}</span>
           <button
             onClick={() => onAdd(product)}
             className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
