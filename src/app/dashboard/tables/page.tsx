@@ -201,35 +201,35 @@ export default function TablesPage() {
                 className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Mesa {table.number}
-                  </h3>
-                  <p className="text-sm text-gray-500">{table.name}</p>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Mesa {table.number}
+                    </h3>
+                    <p className="text-sm text-gray-500">{table.name}</p>
+                  </div>
+                  <TableStatusBadge status={table.status} />
                 </div>
-                <TableStatusBadge status={table.status} />
-              </div>
 
-              {table.capacity && (
-                <div className="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
-                  <UsersIcon className="w-4 h-4" />
-                  <span>{table.capacity} pessoas</span>
-                </div>
-              )}
+                {table.capacity && (
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
+                    <UsersIcon className="w-4 h-4" />
+                    <span>{table.capacity} pessoas</span>
+                  </div>
+                )}
 
-              {showAmount && (
-                <div className="mb-4 rounded-xl bg-gray-50 border border-gray-100 p-3">
-                  <p className="text-xs text-gray-500">Montant à payer</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {new Intl.NumberFormat("fr-FR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(tabTotal / 100)}
-                  </p>
-                </div>
-              )}
+                {showAmount && (
+                  <div className="mb-4 rounded-xl bg-gray-50 border border-gray-100 p-3">
+                    <p className="text-xs text-gray-500">Montant à payer</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {new Intl.NumberFormat("fr-FR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(tabTotal / 100)}
+                    </p>
+                  </div>
+                )}
 
-              <div className="flex gap-2">
+                <div className="flex gap-2">
                 <button
                   onClick={() => handleDownloadQr(table.number)}
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
