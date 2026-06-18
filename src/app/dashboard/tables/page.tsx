@@ -219,7 +219,7 @@ export default function TablesPage() {
 
                 {showAmount && (
                   <div className="mb-4 rounded-xl bg-gray-50 border border-gray-100 p-3">
-                    <p className="text-xs text-gray-500">Montant à payer</p>
+                    <p className="text-xs text-gray-500">Valor a pagar</p>
                     <p className="text-xl font-bold text-gray-900">
                       {new Intl.NumberFormat("fr-FR", {
                         style: "currency",
