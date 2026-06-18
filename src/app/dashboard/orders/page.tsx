@@ -41,7 +41,7 @@ const NEXT_ACTION_LABELS: Record<string, string> = {
 };
 
 export default function OrdersPage() {
-  const { organization } = useOrganization();
+  const { organization, isLoaded: isOrgLoaded } = useOrganization();
   const [filter, setFilter] = useState<string>("ALL");
 
   const restaurant = useQuery(
@@ -88,12 +88,25 @@ export default function OrdersPage() {
     READY: orders?.filter((o) => o.status === "READY").length ?? 0,
   };
 
-  if (!restaurant) {
+  const isLoading = !isOrgLoaded || (organization?.id && restaurant === undefined);
+
+  if (isLoading) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
           <div className="h-6 bg-gray-100 rounded w-1/4 mb-8" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!organization?.id || restaurant === null) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Restaurante não encontrado</h2>
+          <p className="text-gray-500">Verifique se a organização está selecionada corretamente.</p>
         </div>
       </div>
     );

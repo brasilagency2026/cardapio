@@ -16,7 +16,7 @@ import { TableStatusBadge } from "@/components/shared/table-status-badge";
 import QRCode from "qrcode";
 
 export default function TablesPage() {
-  const { organization } = useOrganization();
+  const { organization, isLoaded: isOrgLoaded } = useOrganization();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [form, setForm] = useState({ name: "", number: "", capacity: "" });
 
@@ -106,12 +106,30 @@ export default function TablesPage() {
     link.click();
   };
 
-  if (!restaurant) {
+  const isLoading = !isOrgLoaded || (organization?.id && restaurant === undefined);
+
+  if (isLoading) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
           <div className="h-6 bg-gray-100 rounded w-1/4 mb-8" />
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="h-24 bg-gray-100 rounded-2xl" />
+            <div className="h-24 bg-gray-100 rounded-2xl" />
+            <div className="h-24 bg-gray-100 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!organization?.id || restaurant === null) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Restaurante não encontrado</h2>
+          <p className="text-gray-500">Verifique se a organização está selecionada corretamente.</p>
         </div>
       </div>
     );

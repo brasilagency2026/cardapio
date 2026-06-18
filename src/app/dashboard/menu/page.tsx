@@ -5,9 +5,10 @@ import { useQuery, useMutation } from "convex/react";
 import { useOrganization } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { PlusIcon, EditIcon, Trash2Icon, XIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export default function MenuPage() {
-  const { organization } = useOrganization();
+  const { organization, isLoaded: isOrgLoaded } = useOrganization();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: "", description: "" });
@@ -55,8 +56,10 @@ export default function MenuPage() {
       });
       setCategoryForm({ name: "", description: "" });
       setShowCategoryModal(false);
+      toast.success("Categoria criada com sucesso! 🎉");
     } catch (error) {
       console.error("Erro ao criar categoria:", error);
+      toast.error("Erro ao criar categoria. Tente novamente.");
     }
   };
 
@@ -111,8 +114,10 @@ export default function MenuPage() {
         variationPrice: "",
       });
       setShowProductModal(false);
+      toast.success("Produto criado com sucesso! 🎉");
     } catch (error) {
       console.error("Erro ao criar produto:", error);
+      toast.error("Erro ao criar produto. Tente novamente.");
     }
   };
 
@@ -153,12 +158,31 @@ export default function MenuPage() {
     }
   };
 
-  if (!restaurant) {
+  // Loading: org or restaurant query still in flight
+  const isLoading = !isOrgLoaded || (organization?.id && restaurant === undefined);
+  
+  if (isLoading) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-6 bg-gray-100 rounded w-1/4 mb-8"></div>
+          <div className="h-40 bg-gray-100 rounded-2xl mb-4"></div>
+          <div className="h-40 bg-gray-100 rounded-2xl"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // No organization selected or restaurant not found
+  if (!organization?.id || restaurant === null) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Restaurante não encontrado</h2>
+          <p className="text-gray-500">
+            Verifique se a organização está selecionada corretamente no menu lateral.
+          </p>
         </div>
       </div>
     );
