@@ -23,6 +23,20 @@ export default function MenuPage() {
     variationName: "",
     variationPrice: "",
   });
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editCategoryForm, setEditCategoryForm] = useState({ name: "", description: "" });
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editProductForm, setEditProductForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    categoryId: "",
+    image: null as File | null,
+    imagePreview: "",
+    variations: [] as { name: string; price: string }[],
+    variationName: "",
+    variationPrice: "",
+  });
 
   const restaurant = useQuery(
     api.restaurants.getByClerkOrg,
@@ -41,6 +55,10 @@ export default function MenuPage() {
 
   const createCategory = useMutation(api.products.createCategory);
   const createProduct = useMutation(api.products.createProduct);
+  const updateCategory = useMutation(api.products.updateCategory);
+  const deleteCategory = useMutation(api.products.deleteCategory);
+  const updateProduct = useMutation(api.products.updateProduct);
+  const deleteProduct = useMutation(api.products.deleteProduct);
 
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +136,127 @@ export default function MenuPage() {
     } catch (error) {
       console.error("Erro ao criar produto:", error);
       toast.error("Erro ao criar produto. Tente novamente.");
+    }
+  };
+
+  const handleEditCategory = (cat: any) => {
+    setEditingCategoryId(cat._id);
+    setEditCategoryForm({ name: cat.name, description: cat.description || "" });
+  };
+
+  const handleUpdateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategoryId || !editCategoryForm.name) return;
+
+    try {
+      await updateCategory({
+        id: editingCategoryId as any,
+        name: editCategoryForm.name,
+        description: editCategoryForm.description || undefined,
+      });
+      setEditingCategoryId(null);
+      setEditCategoryForm({ name: "", description: "" });
+      toast.success("Categoria atualizada com sucesso! 🎉");
+    } catch (error) {
+      console.error("Erro ao atualizar categoria:", error);
+      toast.error("Erro ao atualizar categoria. Tente novamente.");
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!confirm("Tem certeza que deseja deletar esta categoria?")) return;
+
+    try {
+      await deleteCategory({ id: categoryId as any });
+      toast.success("Categoria deletada com sucesso! 🎉");
+    } catch (error) {
+      console.error("Erro ao deletar categoria:", error);
+      toast.error("Erro ao deletar categoria. Tente novamente.");
+    }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProductId(product._id);
+    setEditProductForm({
+      name: product.name,
+      description: product.description || "",
+      price: (product.price / 100).toString(),
+      categoryId: product.categoryId,
+      image: null,
+      imagePreview: product.image || "",
+      variations: product.variations || [],
+      variationName: "",
+      variationPrice: "",
+    });
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProductId || !editProductForm.name || !editProductForm.categoryId || !editProductForm.price) return;
+
+    try {
+      let imageUrl = editProductForm.imagePreview;
+      
+      // Upload image if provided
+      if (editProductForm.image) {
+        const formData = new FormData();
+        formData.append('file', editProductForm.image);
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          imageUrl = url;
+        }
+      }
+
+      // Convert variations to API format
+      const variationsData = editProductForm.variations.map((v) => ({
+        name: v.name,
+        price: Math.round(parseFloat(v.price) * 100),
+      }));
+
+      await updateProduct({
+        id: editingProductId as any,
+        name: editProductForm.name,
+        description: editProductForm.description || undefined,
+        price: Math.round(parseFloat(editProductForm.price) * 100),
+        categoryId: editProductForm.categoryId as any,
+        image: imageUrl,
+        variations: variationsData.length > 0 ? variationsData : undefined,
+      });
+      
+      setEditingProductId(null);
+      setEditProductForm({
+        name: "",
+        description: "",
+        price: "",
+        categoryId: "",
+        image: null,
+        imagePreview: "",
+        variations: [],
+        variationName: "",
+        variationPrice: "",
+      });
+      toast.success("Produto atualizado com sucesso! 🎉");
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      toast.error("Erro ao atualizar produto. Tente novamente.");
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm("Tem certeza que deseja deletar este produto?")) return;
+
+    try {
+      await deleteProduct({ id: productId as any });
+      toast.success("Produto deletado com sucesso! 🎉");
+    } catch (error) {
+      console.error("Erro ao deletar produto:", error);
+      toast.error("Erro ao deletar produto. Tente novamente.");
     }
   };
 
@@ -229,10 +368,16 @@ export default function MenuPage() {
                   {cat.description && <p className="text-sm text-gray-500">{cat.description}</p>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                  <button 
+                    onClick={() => handleEditCategory(cat)}
+                    className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                  >
                     <EditIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                  <button 
+                    onClick={() => handleDeleteCategory(cat._id)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  >
                     <Trash2Icon className="w-4 h-4" />
                   </button>
                 </div>
@@ -293,10 +438,16 @@ export default function MenuPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                  <button 
+                    onClick={() => handleEditProduct(product)}
+                    className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                  >
                     <EditIcon className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                  <button 
+                    onClick={() => handleDeleteProduct(product._id)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  >
                     <Trash2Icon className="w-4 h-4" />
                   </button>
                 </div>
@@ -521,6 +672,285 @@ export default function MenuPage() {
                   className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
                 >
                   Criar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Categoria */}
+      {editingCategoryId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Editar Categoria</h3>
+              <button
+                onClick={() => {
+                  setEditingCategoryId(null);
+                  setEditCategoryForm({ name: "", description: "" });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCategory} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                <input
+                  type="text"
+                  value={editCategoryForm.name}
+                  onChange={(e) => setEditCategoryForm({ ...editCategoryForm, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: Pizzas"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                <textarea
+                  value={editCategoryForm.description}
+                  onChange={(e) => setEditCategoryForm({ ...editCategoryForm, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: Nossas deliciosas pizzas"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingCategoryId(null);
+                    setEditCategoryForm({ name: "", description: "" });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Produto */}
+      {editingProductId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Editar Produto</h3>
+              <button
+                onClick={() => {
+                  setEditingProductId(null);
+                  setEditProductForm({
+                    name: "",
+                    description: "",
+                    price: "",
+                    categoryId: "",
+                    image: null,
+                    imagePreview: "",
+                    variations: [],
+                    variationName: "",
+                    variationPrice: "",
+                  });
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateProduct} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Categoria *</label>
+                <select
+                  value={editProductForm.categoryId}
+                  onChange={(e) => setEditProductForm({ ...editProductForm, categoryId: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories?.map((cat: any) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                <input
+                  type="text"
+                  value={editProductForm.name}
+                  onChange={(e) => setEditProductForm({ ...editProductForm, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: Pizza Margherita"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                <textarea
+                  value={editProductForm.description}
+                  onChange={(e) => setEditProductForm({ ...editProductForm, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Descreva seu produto..."
+                  rows={2}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preço Padrão (R$) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editProductForm.price}
+                  onChange={(e) => setEditProductForm({ ...editProductForm, price: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: 25.90"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Produto</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEditProductForm({
+                          ...editProductForm,
+                          image: file,
+                          imagePreview: URL.createObjectURL(file),
+                        });
+                      }
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  {editProductForm.imagePreview && (
+                    <div className="mt-3 relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={editProductForm.imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Variações */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 mb-3">Tamanhos/Variações</h4>
+                
+                {editProductForm.variations.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {editProductForm.variations.map((variation, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">{variation.name}</p>
+                          <p className="text-xs text-gray-500">R$ {parseFloat(variation.price).toFixed(2)}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditProductForm({
+                            ...editProductForm,
+                            variations: editProductForm.variations.filter((_, i) => i !== index),
+                          })}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: Pequena"
+                    value={editProductForm.variationName}
+                    onChange={(e) => setEditProductForm({ ...editProductForm, variationName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Preço (R$)"
+                    value={editProductForm.variationPrice}
+                    onChange={(e) => setEditProductForm({ ...editProductForm, variationPrice: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!editProductForm.variationName || !editProductForm.variationPrice) return;
+                      
+                      setEditProductForm({
+                        ...editProductForm,
+                        variations: [
+                          ...editProductForm.variations,
+                          {
+                            name: editProductForm.variationName,
+                            price: editProductForm.variationPrice,
+                          },
+                        ],
+                        variationName: "",
+                        variationPrice: "",
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    Adicionar Variação
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProductId(null);
+                    setEditProductForm({
+                      name: "",
+                      description: "",
+                      price: "",
+                      categoryId: "",
+                      image: null,
+                      imagePreview: "",
+                      variations: [],
+                      variationName: "",
+                      variationPrice: "",
+                    });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                >
+                  Salvar
                 </button>
               </div>
             </form>
