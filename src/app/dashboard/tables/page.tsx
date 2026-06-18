@@ -30,6 +30,11 @@ export default function TablesPage() {
     restaurant?._id ? { restaurantId: restaurant._id } : "skip"
   );
 
+  const tabsWithTables = useQuery(
+    api.tabs.listWithOrders,
+    restaurant?._id ? { restaurantId: restaurant._id } : "skip"
+  );
+
   const createTable = useMutation(api.tables.create);
   const updateStatus = useMutation(api.tables.updateStatus);
 
@@ -185,11 +190,16 @@ export default function TablesPage() {
       {/* Lista de mesas */}
       {tables && tables.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tables.map((table) => (
-            <div
-              key={table._id}
-              className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-sm transition-shadow"
-            >
+          {tables.map((table) => {
+            const tab = tabsWithTables?.find((t) => t.table?._id === table._id);
+            const tabTotal = tab?.total ?? 0;
+            const showAmount = table.status !== "FREE" && tabTotal > 0;
+
+            return (
+              <div
+                key={table._id}
+                className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-sm transition-shadow"
+              >
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -204,6 +214,18 @@ export default function TablesPage() {
                 <div className="flex items-center gap-1.5 text-sm text-gray-500 mb-4">
                   <UsersIcon className="w-4 h-4" />
                   <span>{table.capacity} pessoas</span>
+                </div>
+              )}
+
+              {showAmount && (
+                <div className="mb-4 rounded-xl bg-gray-50 border border-gray-100 p-3">
+                  <p className="text-xs text-gray-500">Montant à payer</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(tabTotal / 100)}
+                  </p>
                 </div>
               )}
 
