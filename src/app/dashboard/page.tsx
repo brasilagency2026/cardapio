@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { Suspense } from "react";
+import { useQuery } from "convex/react";
 import { useOrganization } from "@clerk/nextjs";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/convex/_generated/api";
 import { formatCurrency } from "@/lib/utils";
-import { toast } from "sonner";
+import { PlanUpdater } from "@/components/dashboard/plan-updater";
 import {
   TableIcon,
   ShoppingBagIcon,
@@ -25,55 +24,11 @@ import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 
 export default function DashboardPage() {
   const { organization } = useOrganization();
-  const searchParams = useSearchParams();
-  const [planUpdated, setPlanUpdated] = useState(false);
-  
-  const planParam = searchParams.get("plano");
-  const planMap: Record<string, "DIGITAL_MENU" | "RESTAURANT_SMART"> = {
-    digital: "DIGITAL_MENU",
-    completo: "RESTAURANT_SMART",
-  };
-  const targetPlan = planParam ? planMap[planParam] : null;
 
   const restaurant = useQuery(
     api.restaurants.getByClerkOrg,
     organization?.id ? { clerkOrgId: organization.id } : "skip"
   );
-
-  const updatePlan = useMutation(api.restaurants.updatePlan);
-
-  // Update plan if URL parameter is set
-  useEffect(() => {
-    if (!restaurant?._id || !targetPlan || planUpdated) return;
-    if (restaurant.plan === targetPlan) {
-      // Plan already correct, just remove the param
-      window.history.replaceState({}, "", "/dashboard");
-      return;
-    }
-
-    const updateRestaurantPlan = async () => {
-      try {
-        await updatePlan({
-          id: restaurant._id,
-          plan: targetPlan,
-          planStatus: "TRIAL",
-        });
-        setPlanUpdated(true);
-        toast.success(
-          targetPlan === "RESTAURANT_SMART"
-            ? "Bem-vindo ao plano Gestão Completa! 🎉"
-            : "Plano atualizado para Cardápio Digital"
-        );
-        // Clean up URL
-        window.history.replaceState({}, "", "/dashboard");
-      } catch (error) {
-        console.error("Erro ao atualizar plano:", error);
-        toast.error("Erro ao atualizar plano. Tente novamente.");
-      }
-    };
-
-    updateRestaurantPlan();
-  }, [restaurant?._id, targetPlan, planUpdated, updatePlan]);
 
   const tables = useQuery(
     api.tables.list,
@@ -105,8 +60,14 @@ export default function DashboardPage() {
   const isDigitalOnly = restaurant?.plan === "DIGITAL_MENU";
   const publicMenuUrl = restaurant ? `https://cardapio.foodpronto.com.br/${restaurant.slug}` : "#";
 
-  if (isDigitalOnly) {
-    return (
+  return (
+    <>
+      {/* Handle plan updates from URL parameter */}
+      <Suspense fallback={null}>
+        <PlanUpdater restaurantId={restaurant?._id} currentPlan={restaurant?.plan} />
+      </Suspense>
+
+      {isDigitalOnly ? (
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -160,23 +121,20 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-medium text-gray-900">
-          Bom dia, {restaurant?.name ?? "Restaurante"} 👋
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {new Date().toLocaleDateString("pt-BR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
+    ) : (
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-medium text-gray-900">
+            Bom dia, {restaurant?.name ?? "Restaurante"} 👋
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {new Date().toLocaleDateString("pt-BR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
         </p>
       </div>
 
@@ -313,6 +271,8 @@ export default function DashboardPage() {
         )}
       </div>
     </div>
+    )}
+    </>
   );
 }
 
