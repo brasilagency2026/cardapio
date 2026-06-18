@@ -155,6 +155,10 @@ export const updateProduct = mutation({
     featured: v.optional(v.boolean()),
     preparationTime: v.optional(v.number()),
     allergens: v.optional(v.array(v.string())),
+    variations: v.optional(v.array(v.object({
+      name: v.string(),
+      price: v.number(),
+    }))),
     categoryId: v.optional(v.id("categories")),
   },
   handler: async (ctx, args) => {
