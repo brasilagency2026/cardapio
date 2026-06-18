@@ -246,8 +246,9 @@ export default function TablesPage() {
                     </button>
                   )}
                 </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
