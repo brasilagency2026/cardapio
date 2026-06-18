@@ -93,14 +93,23 @@ export default function MenuPage() {
         const formData = new FormData();
         formData.append('file', productForm.image);
         
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          imageUrl = url;
+        try {
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (uploadRes.ok) {
+            const { url } = await uploadRes.json();
+            imageUrl = url;
+          } else {
+            const error = await uploadRes.json();
+            console.error('Upload error:', error);
+            toast.error(`Erro ao fazer upload da imagem: ${error.error || 'Unknown error'}`);
+          }
+        } catch (uploadError) {
+          console.error('Upload failed:', uploadError);
+          toast.error('Erro ao fazer upload da imagem.');
         }
       }
 
@@ -202,14 +211,23 @@ export default function MenuPage() {
         const formData = new FormData();
         formData.append('file', editProductForm.image);
         
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          imageUrl = url;
+        try {
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (uploadRes.ok) {
+            const { url } = await uploadRes.json();
+            imageUrl = url;
+          } else {
+            const error = await uploadRes.json();
+            console.error('Upload error:', error);
+            toast.error(`Erro ao fazer upload da imagem: ${error.error || 'Unknown error'}`);
+          }
+        } catch (uploadError) {
+          console.error('Upload failed:', uploadError);
+          toast.error('Erro ao fazer upload da imagem.');
         }
       }
 
