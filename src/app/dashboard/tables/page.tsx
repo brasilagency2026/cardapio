@@ -200,7 +200,7 @@ export default function TablesPage() {
                 key={table._id}
                 className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-sm transition-shadow"
               >
-              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     Mesa {table.number}
