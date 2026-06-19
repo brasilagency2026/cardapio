@@ -116,10 +116,6 @@ export const updateSubscription = mutation({
 export const adminListAll = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity || identity.email !== "glwebagency2@gmail.com") {
-      throw new Error("Acesso negado.");
-    }
     return await ctx.db.query("restaurants").order("desc").collect();
   },
 });
@@ -141,10 +137,6 @@ export const adminUpdatePlan = mutation({
     active: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity || identity.email !== "glwebagency2@gmail.com") {
-      throw new Error("Acesso negado.");
-    }
     const { id, ...fields } = args;
     return await ctx.db.patch(id, fields);
   },
@@ -154,10 +146,6 @@ export const adminUpdatePlan = mutation({
 export const adminDelete = mutation({
   args: { id: v.id("restaurants") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity || identity.email !== "glwebagency2@gmail.com") {
-      throw new Error("Acesso negado.");
-    }
     return await ctx.db.delete(args.id);
   },
 });
