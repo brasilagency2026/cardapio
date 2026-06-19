@@ -132,13 +132,47 @@ export default function AssinaturaPage() {
 
   if (!restaurant) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4 max-w-2xl">
-          <div className="h-8 bg-gray-200 rounded w-1/3" />
-          <div className="h-40 bg-gray-100 rounded-2xl" />
-          <div className="h-24 bg-gray-100 rounded-2xl" />
+      <div className="p-6 max-w-xl space-y-4">
+        <h1 className="text-2xl font-semibold text-gray-900">Meu Plano</h1>
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-sm space-y-2">
+          <p className="font-medium text-gray-700">Diagnóstico de carregamento:</p>
+          <p className="text-gray-500">
+            Organização Clerk:{" "}
+            <span className={`font-mono font-bold ${organization ? "text-green-600" : "text-red-500"}`}>
+              {organization ? organization.id : "não encontrada"}
+            </span>
+          </p>
+          <p className="text-gray-500">
+            Usuário:{" "}
+            <span className={`font-mono font-bold ${user ? "text-green-600" : "text-red-500"}`}>
+              {user ? user.primaryEmailAddress?.emailAddress : "não conectado"}
+            </span>
+          </p>
+          <p className="text-gray-500">
+            Restaurante:{" "}
+            <span className="font-mono font-bold text-red-500">
+              {restaurant === undefined ? "carregando..." : "não encontrado no banco"}
+            </span>
+          </p>
+
+          {!organization && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2">
+              <p className="text-amber-800 font-medium text-xs">⚠️ Nenhuma organização ativa.</p>
+              <p className="text-amber-600 text-xs mt-1">
+                Este usuário não está associado a nenhuma organização Clerk.
+                Verifique no painel Clerk se o usuário tem uma organização e se está ativa.
+              </p>
+            </div>
+          )}
+
+          {organization && restaurant === null && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mt-2">
+              <p className="text-red-800 font-medium text-xs">⚠️ Organização encontrada mas restaurante não existe no banco.</p>
+              <p className="text-red-600 text-xs mt-1">Org ID: <span className="font-mono">{organization.id}</span></p>
+              <p className="text-red-600 text-xs">Complete o processo de onboarding para criar o restaurante.</p>
+            </div>
+          )}
         </div>
-        <p className="text-xs text-gray-400 mt-4">Carregando informações do restaurante...</p>
       </div>
     );
   }
