@@ -92,3 +92,22 @@ export const updatePlan = mutation({
     return await ctx.db.patch(id, fields);
   },
 });
+
+// ─── Atualizar assinatura (chamado pelo webhook do Mercado Pago) ──
+export const updateSubscription = mutation({
+  args: {
+    restaurantId: v.id("restaurants"),
+    planStatus: v.union(
+      v.literal("ACTIVE"),
+      v.literal("TRIAL"),
+      v.literal("CANCELLED"),
+      v.literal("PAST_DUE")
+    ),
+    mpSubscriptionId: v.optional(v.string()),
+    nextBillingDate: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { restaurantId, ...fields } = args;
+    return await ctx.db.patch(restaurantId, fields);
+  },
+});

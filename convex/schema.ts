@@ -25,6 +25,7 @@ export default defineSchema({
     ),
     trialEndsAt: v.optional(v.number()),
     mpSubscriptionId: v.optional(v.string()),
+    nextBillingDate: v.optional(v.number()),
     active: v.boolean(),
     createdAt: v.number(),
   })

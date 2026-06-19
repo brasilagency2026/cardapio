@@ -16,6 +16,7 @@ import {
   QrCodeIcon,
   SettingsIcon,
   TagIcon,
+  CreditCardIcon,
 } from "lucide-react";
 
 const ALL_NAV_ITEMS = [
@@ -26,12 +27,14 @@ const ALL_NAV_ITEMS = [
   { href: "/kitchen", label: "Cozinha (KDS)", icon: ChefHatIcon },
   { href: "/waiter", label: "Garçom", icon: UtensilsIcon },
   { href: "/dashboard/reports", label: "Relatórios", icon: BarChart3Icon },
+  { href: "/dashboard/assinatura", label: "Meu Plano", icon: CreditCardIcon },
   { href: "/dashboard/settings", label: "Configurações", icon: SettingsIcon },
 ];
 
 const DIGITAL_MENU_ITEMS = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboardIcon },
   { href: "/dashboard/menu", label: "Cardápio", icon: MenuIcon },
+  { href: "/dashboard/assinatura", label: "Meu Plano", icon: CreditCardIcon },
   { href: "/dashboard/settings", label: "Configurações", icon: SettingsIcon },
 ];
 
