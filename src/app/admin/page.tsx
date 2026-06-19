@@ -16,16 +16,32 @@ import {
 export default function AdminPage() {
   const restaurants = useQuery(api.restaurants.adminListAll);
 
-  if (!restaurants) {
+  // Carregando
+  if (restaurants === undefined) {
+    return (
+      <div className="p-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Visão Geral</h1>
+          <p className="text-neutral-500 text-sm mt-1">Carregando dados...</p>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 bg-neutral-800 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Erro
+  if (restaurants === null) {
     return (
       <div className="p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-neutral-800 rounded w-48" />
-          <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-neutral-800 rounded-2xl" />
-            ))}
-          </div>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+          <p className="text-red-400 font-semibold">Erro ao carregar dados.</p>
+          <p className="text-red-500/70 text-sm mt-1">
+            Verifique se o deploy Convex foi executado com <code>npx convex deploy</code>.
+          </p>
         </div>
       </div>
     );
@@ -39,22 +55,17 @@ export default function AdminPage() {
   const smart = restaurants.filter((r) => r.plan === "RESTAURANT_SMART").length;
   const digital = restaurants.filter((r) => r.plan === "DIGITAL_MENU").length;
 
-  const mrr = active * (restaurants.filter((r) => r.planStatus === "ACTIVE" && r.plan === "RESTAURANT_SMART").length * 89 +
-    restaurants.filter((r) => r.planStatus === "ACTIVE" && r.plan === "DIGITAL_MENU").length * 40);
-
   const mrrValue =
     restaurants.filter((r) => r.planStatus === "ACTIVE" && r.plan === "RESTAURANT_SMART").length * 89 +
     restaurants.filter((r) => r.planStatus === "ACTIVE" && r.plan === "DIGITAL_MENU").length * 40;
 
   return (
     <div className="p-8 space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Visão Geral</h1>
         <p className="text-neutral-500 text-sm mt-1">Painel de controle — Foodpronto</p>
       </div>
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           icon={<BuildingIcon className="w-5 h-5 text-blue-400" />}
@@ -82,13 +93,12 @@ export default function AdminPage() {
         />
       </div>
 
-      {/* Status breakdown */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Ativos", count: active, color: "text-green-400", icon: <CheckCircleIcon className="w-4 h-4" /> },
-          { label: "Trial", count: trial, color: "text-blue-400", icon: <ClockIcon className="w-4 h-4" /> },
-          { label: "Em atraso", count: pastDue, color: "text-amber-400", icon: <AlertCircleIcon className="w-4 h-4" /> },
-          { label: "Cancelados", count: cancelled, color: "text-red-400", icon: <XCircleIcon className="w-4 h-4" /> },
+          { label: "Ativos",     count: active,    color: "text-green-400", icon: <CheckCircleIcon className="w-4 h-4" /> },
+          { label: "Trial",      count: trial,     color: "text-blue-400",  icon: <ClockIcon className="w-4 h-4" /> },
+          { label: "Em atraso",  count: pastDue,   color: "text-amber-400", icon: <AlertCircleIcon className="w-4 h-4" /> },
+          { label: "Cancelados", count: cancelled, color: "text-red-400",   icon: <XCircleIcon className="w-4 h-4" /> },
         ].map((s) => (
           <div key={s.label} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center gap-3">
             <span className={s.color}>{s.icon}</span>
@@ -100,21 +110,17 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* Planos */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
           <p className="text-neutral-500 text-xs mb-1">Cardápio Digital (R$40)</p>
           <p className="text-white text-2xl font-bold">{digital}</p>
-          <p className="text-neutral-600 text-xs mt-1">restaurantes</p>
         </div>
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
           <p className="text-neutral-500 text-xs mb-1">Gestão Completa (R$89)</p>
           <p className="text-white text-2xl font-bold">{smart}</p>
-          <p className="text-neutral-600 text-xs mt-1">restaurantes</p>
         </div>
       </div>
 
-      {/* Atalhos */}
       <div className="flex gap-3">
         <Link
           href="/admin/restaurantes"
