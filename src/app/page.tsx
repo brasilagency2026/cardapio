@@ -118,7 +118,7 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8 flex-1">
                 {[
-                  "Cardápio acessível via QR Code na mesa",
+                  "Cardápio acessível via QR Code, NFC e link direto na mesa",
                   "Edição de produtos e preços em tempo real",
                   "Design moderno e responsivo para celular",
                   "Link personalizado do seu restaurante",

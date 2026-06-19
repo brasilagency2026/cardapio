@@ -43,7 +43,7 @@ export default function PlanosPage() {
             <ul className="space-y-4 mb-8 flex-1">
               <li className="flex items-start gap-3">
                 <Check size={20} className="text-green-500 shrink-0 mt-0.5" />
-                <span className="text-neutral-700">Cardápio acessível via QR Code na mesa</span>
+                <span className="text-neutral-700">Cardápio acessível via QR Code, NFC e link direto na mesa</span>
               </li>
               <li className="flex items-start gap-3">
                 <Check size={20} className="text-green-500 shrink-0 mt-0.5" />
