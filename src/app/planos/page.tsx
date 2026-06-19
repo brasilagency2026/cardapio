@@ -1,14 +1,21 @@
 import Link from "next/link";
-import { Check, QrCode, ClipboardList, Utensils, Smartphone, ChefHat } from "lucide-react";
+import { Check, QrCode, ClipboardList, Utensils, Smartphone, ChefHat, ArrowLeft } from "lucide-react";
 
 export default function PlanosPage() {
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">
       <header className="px-6 py-4 flex items-center justify-between border-b border-neutral-200 bg-white sticky top-0 z-50">
-        <div className="flex items-center gap-2 text-[#E24B4A] font-bold text-xl tracking-tight">
+        <Link href="/" className="flex items-center gap-2 text-[#E24B4A] font-bold text-xl tracking-tight">
           <Utensils size={28} />
           <span>Foodpronto</span>
-        </div>
+        </Link>
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Voltar ao início
+        </Link>
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-16">
@@ -122,10 +129,15 @@ export default function PlanosPage() {
       </main>
 
       <footer className="bg-neutral-900 text-neutral-400 py-8 px-6 text-center">
-        <div className="flex items-center justify-center gap-2 text-white font-bold text-lg tracking-tight mb-2">
+        <div className="flex items-center justify-center gap-2 text-white font-bold text-lg tracking-tight mb-4">
           <Utensils size={20} className="text-[#E24B4A]" />
           <span>Foodpronto</span>
         </div>
+        <nav className="flex items-center justify-center gap-6 text-sm text-neutral-500 mb-4">
+          <Link href="/" className="hover:text-neutral-300 transition-colors">Início</Link>
+          <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
+          <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos de Uso</Link>
+        </nav>
         <p className="text-sm">
           &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.
         </p>
