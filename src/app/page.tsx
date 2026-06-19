@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Utensils, QrCode, TrendingUp, Smartphone } from "lucide-react";
+import { ArrowRight, Utensils, QrCode, TrendingUp, Smartphone, Check, ChefHat } from "lucide-react";
 
 export default function Home() {
   return (
@@ -88,6 +88,101 @@ export default function Home() {
               title="Gestão Simplificada"
               description="Dashboard completo para atualizar preços, adicionar produtos e gerenciar seu negócio em tempo real."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="bg-neutral-50 py-24 px-6 border-t border-neutral-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4 text-neutral-900">Escolha o plano ideal para você</h2>
+            <p className="text-neutral-500 max-w-xl mx-auto">
+              Comece com o cardápio digital e evolua quando precisar. 30 dias grátis em qualquer plano, sem cartão de crédito.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Plano Cardápio Digital */}
+            <div className="bg-white rounded-3xl p-8 border border-neutral-200 shadow-sm hover:shadow-xl transition-all flex flex-col">
+              <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-5">
+                <QrCode size={28} className="text-orange-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-neutral-900 mb-1">Cardápio Digital</h3>
+              <p className="text-neutral-500 text-sm mb-6">Modernize a experiência do cliente na mesa, sem papel.</p>
+
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-extrabold text-neutral-900">R$ 40</span>
+                <span className="text-neutral-400 font-medium">/mês</span>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  "Cardápio acessível via QR Code na mesa",
+                  "Edição de produtos e preços em tempo real",
+                  "Design moderno e responsivo para celular",
+                  "Link personalizado do seu restaurante",
+                  "Upload de fotos dos pratos",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <Check size={18} className="text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-neutral-700 text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/cadastro"
+                className="w-full block text-center py-3.5 rounded-full border-2 border-neutral-200 text-neutral-700 font-semibold hover:border-[#E24B4A] hover:text-[#E24B4A] transition-colors"
+              >
+                Começar grátis
+              </Link>
+              <p className="text-center text-xs text-neutral-400 mt-3">30 dias grátis, sem cartão</p>
+            </div>
+
+            {/* Plano Gestão Completa */}
+            <div className="bg-neutral-900 rounded-3xl p-8 border border-neutral-800 shadow-2xl flex flex-col relative transform md:-translate-y-4">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#E24B4A] to-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
+                Mais Escolhido
+              </div>
+
+              <div className="w-14 h-14 rounded-2xl bg-[#E24B4A]/20 flex items-center justify-center mb-5 mt-2">
+                <ChefHat size={28} className="text-[#E24B4A]" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-1">Gestão Completa</h3>
+              <p className="text-neutral-400 text-sm mb-6">Cardápio + pedidos + mesas + cozinha, tudo integrado.</p>
+
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-extrabold text-white">R$ 89</span>
+                <span className="text-neutral-400 font-medium">/mês</span>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  { text: "Tudo do plano Cardápio Digital", highlight: true },
+                  { text: "Clientes fazem pedidos pelo celular direto na mesa", highlight: false },
+                  { text: "Gestão de mesas e comandas digitais", highlight: false },
+                  { text: "Painel KDS em tempo real para a cozinha", highlight: false },
+                  { text: "Painel do garçom: entregas e pagamentos", highlight: false },
+                  { text: "Relatórios de vendas e controle de caixa", highlight: false },
+                ].map((item) => (
+                  <li key={item.text} className="flex items-start gap-3">
+                    <Check size={18} className="text-[#E24B4A] shrink-0 mt-0.5" />
+                    <span className={`text-sm ${item.highlight ? "text-white font-semibold" : "text-neutral-300"}`}>
+                      {item.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/cadastro"
+                className="w-full block text-center py-3.5 rounded-full bg-gradient-to-r from-[#E24B4A] to-orange-500 text-white font-semibold hover:shadow-lg hover:shadow-[#E24B4A]/40 transition-all active:scale-95"
+              >
+                Testar grátis por 30 dias
+              </Link>
+              <p className="text-center text-xs text-neutral-500 mt-3">30 dias grátis, sem cartão</p>
+            </div>
           </div>
         </div>
       </section>
