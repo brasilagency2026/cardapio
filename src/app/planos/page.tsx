@@ -120,6 +120,19 @@ export default function PlanosPage() {
           </div>
         </div>
       </main>
+
+      <footer className="bg-neutral-900 text-neutral-400 py-8 px-6 text-center">
+        <div className="flex items-center justify-center gap-2 text-white font-bold text-lg tracking-tight mb-2">
+          <Utensils size={20} className="text-[#E24B4A]" />
+          <span>Foodpronto</span>
+        </div>
+        <p className="text-sm">
+          &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.
+        </p>
+        <p className="text-xs text-neutral-600 mt-1">
+          CNPJ 64.465.357/0001-28
+        </p>
+      </footer>
     </div>
   );
 }

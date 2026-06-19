@@ -101,6 +101,9 @@ export default function ContatoPage() {
         <p className="text-sm">
           &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.
         </p>
+        <p className="text-xs text-neutral-600 mt-1">
+          CNPJ 64.465.357/0001-28
+        </p>
       </footer>
     </div>
   );
