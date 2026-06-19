@@ -102,6 +102,7 @@ export default function ContatoPage() {
           <Link href="/planos" className="hover:text-neutral-300 transition-colors">Planos</Link>
           <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
           <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos de Uso</Link>
+          <Link href="/privacidade" className="hover:text-neutral-300 transition-colors">Privacidade</Link>
         </nav>
         <p className="text-sm">
           &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.

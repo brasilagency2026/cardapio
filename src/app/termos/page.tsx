@@ -226,6 +226,7 @@ físicos, sem participação no processo de desenvolviment de código fonte da a
           <Link href="/planos" className="hover:text-neutral-300 transition-colors">Planos</Link>
           <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
           <Link href="/termos" className="hover:text-neutral-300 transition-colors text-neutral-300">Termos de Uso</Link>
+          <Link href="/privacidade" className="hover:text-neutral-300 transition-colors">Privacidade</Link>
         </nav>
         <p className="text-xs text-neutral-600">
           &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.
