@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -10,15 +11,23 @@ const isPublicRoute = createRouteMatcher([
   "/privacidade(.*)",
   "/quem-somos(.*)",
   "/menu(.*)",
-  "/:slug",
   "/api(.*)",
 ]);
 
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    await auth.protect({
-      unauthenticatedUrl: `${req.nextUrl.origin}/entrar`,
-    });
+    // Pour les routes admin, rediriger vers /entrar avec redirect_url=/admin
+    if (isAdminRoute(req)) {
+      await auth.protect({
+        unauthenticatedUrl: `${req.nextUrl.origin}/entrar?redirect_url=/admin`,
+      });
+    } else {
+      await auth.protect({
+        unauthenticatedUrl: `${req.nextUrl.origin}/entrar`,
+      });
+    }
   }
 });
 
