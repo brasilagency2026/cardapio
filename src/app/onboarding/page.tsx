@@ -49,7 +49,9 @@ function sanitizeSlug(text: string) {
 export default function OnboardingPage() {
   const router = useRouter();
   const { isLoaded: isUserLoaded, user } = useUser();
-  const { createOrganization, setActive } = useOrganizationList();
+  const { createOrganization, setActive, userMemberships } = useOrganizationList({
+    userMemberships: { infinite: true },
+  });
   const createRestaurant = useMutation(api.restaurants.create);
 
   const [name, setName] = useState("");
@@ -57,6 +59,9 @@ export default function OnboardingPage() {
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Verifica se já existe uma org para o usuário
+  const existingOrg = userMemberships?.data?.[0]?.organization ?? null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,25 +74,35 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      if (!createOrganization || !setActive) {
+      if (!setActive) {
         throw new Error("Erro interno do Clerk. Tente novamente.");
       }
 
-      // 1. Criar organização no Clerk
-      const organization = await createOrganization({ name });
-      await setActive({ organization: organization.id });
+      let orgId: string;
+
+      if (existingOrg) {
+        // Reusar organização existente
+        orgId = existingOrg.id;
+        await setActive({ organization: orgId });
+      } else {
+        // Criar nova organização
+        if (!createOrganization) throw new Error("Erro interno do Clerk.");
+        const organization = await createOrganization({ name });
+        orgId = organization.id;
+        await setActive({ organization: orgId });
+      }
 
       // 2. Gerar Slug SEO
       const slug = `${state.toLowerCase()}-${sanitizeSlug(city)}-${sanitizeSlug(name)}`;
 
       // 3. Salvar no Convex
       await createRestaurant({
-        clerkOrgId: organization.id,
+        clerkOrgId: orgId,
         name,
         slug,
         city,
         state,
-        plan: "DIGITAL_MENU", // Plano padrão, será atualizado na próxima tela
+        plan: "DIGITAL_MENU",
       });
 
       // 4. Redirecionar para escolha de planos
@@ -120,6 +135,12 @@ export default function OnboardingPage() {
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-medium">
             {error}
+          </div>
+        )}
+
+        {existingOrg && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-xl mb-6 text-sm">
+            ℹ️ Conta Clerk detectada: <strong>{existingOrg.name}</strong>. O restaurante será vinculado a esta organização.
           </div>
         )}
 
