@@ -199,6 +199,11 @@ export default function Home() {
           <Utensils size={24} className="text-[#E24B4A]" />
           <span>Foodpronto</span>
         </div>
+        <nav className="flex items-center justify-center gap-6 text-sm text-neutral-500 mb-4">
+          <Link href="/planos" className="hover:text-neutral-300 transition-colors">Planos</Link>
+          <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
+          <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos de Uso</Link>
+        </nav>
         <p className="text-sm">
           &copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.
         </p>
