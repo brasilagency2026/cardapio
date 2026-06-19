@@ -12,6 +12,12 @@ export default function Home() {
         </div>
         <nav className="flex items-center gap-4">
           <Link
+            href="/contato"
+            className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
+            Contato
+          </Link>
+          <Link
             href="/entrar"
             className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
           >
