@@ -143,7 +143,7 @@ export default function QuemSomosPage() {
         <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 text-center">
           <p className="text-neutral-300 text-lg leading-relaxed max-w-2xl mx-auto">
             Acreditamos que <strong className="text-white">qualquer estabelecimento</strong> —
-            seja um food truck na praia, um quiosque à beira-mar ou um restaurante no centro da
+            seja um food truck ambulante, um quiosque à beira-mar ou um restaurante no centro da
             cidade — merece acesso a ferramentas modernas, acessíveis e fáceis de usar.
             Sem burocracia, sem maquininha obrigatória, sem barreiras técnicas.
           </p>
