@@ -19,6 +19,9 @@ export default function PlanosPage() {
           <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
             Comece a transformar o seu atendimento hoje mesmo. Você pode alterar seu plano a qualquer momento.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+            ✅ 30 dias grátis — sem cartão de crédito
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -62,6 +65,7 @@ export default function PlanosPage() {
             >
               Começar com o Cardápio
             </Link>
+            <p className="text-center text-xs text-neutral-400 mt-3">30 dias grátis, sem cartão</p>
           </div>
 
           {/* Plano Completo */}
@@ -112,6 +116,7 @@ export default function PlanosPage() {
             >
               Testar Gestão Completa
             </Link>
+            <p className="text-center text-xs text-neutral-500 mt-3">30 dias grátis, sem cartão</p>
           </div>
         </div>
       </main>

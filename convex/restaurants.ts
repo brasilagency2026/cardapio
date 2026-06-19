@@ -23,7 +23,7 @@ export const create = mutation({
     if (existing) throw new Error("Esse endereço já está em uso.");
 
     const now = Date.now();
-    const trialEndsAt = now + 14 * 24 * 60 * 60 * 1000; // 14 dias
+    const trialEndsAt = now + 30 * 24 * 60 * 60 * 1000; // 30 dias
 
     return await ctx.db.insert("restaurants", {
       ...args,
