@@ -138,6 +138,7 @@ export default function AssinaturaPage() {
           <div className="h-40 bg-gray-100 rounded-2xl" />
           <div className="h-24 bg-gray-100 rounded-2xl" />
         </div>
+        <p className="text-xs text-gray-400 mt-4">Carregando informações do restaurante...</p>
       </div>
     );
   }
