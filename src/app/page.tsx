@@ -12,6 +12,12 @@ export default function Home() {
         </div>
         <nav className="flex items-center gap-4">
           <Link
+            href="/quem-somos"
+            className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
+            Quem Somos
+          </Link>
+          <Link
             href="/contato"
             className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
           >
@@ -199,8 +205,9 @@ export default function Home() {
           <Utensils size={24} className="text-[#E24B4A]" />
           <span>Foodpronto</span>
         </div>
-        <nav className="flex items-center justify-center gap-6 text-sm text-neutral-500 mb-4">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-neutral-500 mb-4">
           <Link href="/planos" className="hover:text-neutral-300 transition-colors">Planos</Link>
+          <Link href="/quem-somos" className="hover:text-neutral-300 transition-colors">Quem Somos</Link>
           <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
           <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos de Uso</Link>
           <Link href="/privacidade" className="hover:text-neutral-300 transition-colors">Privacidade</Link>

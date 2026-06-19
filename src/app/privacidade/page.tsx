@@ -139,9 +139,10 @@ export default function PrivacidadePage() {
           <Utensils size={20} className="text-[#E24B4A]" />
           <span>Food Pronto</span>
         </div>
-        <nav className="flex items-center justify-center gap-6 text-sm text-neutral-500 mb-6">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-neutral-500 mb-6">
           <Link href="/" className="hover:text-neutral-300 transition-colors">Início</Link>
           <Link href="/planos" className="hover:text-neutral-300 transition-colors">Planos</Link>
+          <Link href="/quem-somos" className="hover:text-neutral-300 transition-colors">Quem Somos</Link>
           <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
           <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos de Uso</Link>
           <Link href="/privacidade" className="hover:text-neutral-300 transition-colors text-neutral-300">Privacidade</Link>
