@@ -24,7 +24,7 @@ const APPS = [
     app: "foodpronto.com.br",
     url: "https://foodpronto.com.br",
     description:
-      "Solução completa para food trucks: cardápio digital via QR Code, pedidos pelo celular, gestão de filas e pagamentos sem maquininha.",
+      "Solução completa para food trucks ambulantes: cardápio digital via QR Code, pedidos pelo celular, gestão de filas e pagamentos sem maquininha.",
   },
   {
     icon: Waves,
