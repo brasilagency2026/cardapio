@@ -171,7 +171,9 @@ export default function MenuPage() {
             )}
             <div>
               <h1 className="font-semibold text-gray-900">{restaurant.name}</h1>
-              <p className="text-xs text-gray-400">Mesa {tableNumber}</p>
+              {restaurant.plan === "RESTAURANT_SMART" && tableNumber > 0 && (
+                <p className="text-xs text-gray-400">Mesa {tableNumber}</p>
+              )}
             </div>
           </div>
           {/* Busca */}
