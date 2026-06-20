@@ -158,6 +158,23 @@ export default function AdminRestaurantesPage() {
                     >
                       /{r.slug}<ExternalLinkIcon className="w-3 h-3" />
                     </a>
+                    <div className="flex flex-col gap-0.5 mt-1.5">
+                      {r.ownerEmail && (
+                        <a href={`mailto:${r.ownerEmail}`} className="text-xs text-blue-400 hover:underline">
+                          ✉ {r.ownerEmail}
+                        </a>
+                      )}
+                      {r.ownerWhatsapp && (
+                        <a
+                          href={`https://wa.me/55${r.ownerWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent("Olá! Sou da equipe Foodpronto, tudo bem?")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-green-400 hover:underline"
+                        >
+                          📱 {r.ownerWhatsapp}
+                        </a>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-4 text-neutral-300 text-xs">{PLAN_LABELS[r.plan]}</td>
                   <td className="px-4 py-4">

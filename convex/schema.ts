@@ -26,6 +26,8 @@ export default defineSchema({
     trialEndsAt: v.optional(v.number()),
     mpSubscriptionId: v.optional(v.string()),
     nextBillingDate: v.optional(v.number()),
+    ownerEmail: v.optional(v.string()),
+    ownerWhatsapp: v.optional(v.string()),
     active: v.boolean(),
     createdAt: v.number(),
   })

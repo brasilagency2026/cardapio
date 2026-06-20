@@ -57,6 +57,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -69,7 +70,6 @@ export default function OnboardingPage() {
       setError("Por favor, preencha todos os campos.");
       return;
     }
-
     setLoading(true);
     setError("");
 
@@ -103,6 +103,8 @@ export default function OnboardingPage() {
         city,
         state,
         plan: "DIGITAL_MENU",
+        ownerEmail: user?.primaryEmailAddress?.emailAddress ?? undefined,
+        ownerWhatsapp: whatsapp.trim() || undefined,
       });
 
       // 4. Redirecionar para escolha de planos
@@ -191,6 +193,30 @@ export default function OnboardingPage() {
                 placeholder="Ex: São Paulo"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
+              WhatsApp <span className="text-neutral-400 font-normal">(com DDD)</span>
+            </label>
+            <input
+              type="tel"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#E24B4A]/50 focus:border-[#E24B4A] transition-all"
+              placeholder="Ex: (13) 98203-2534"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Usado para suporte e comunicação com a equipe Foodpronto.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
+              E-mail
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-500 text-sm">
+              {user?.primaryEmailAddress?.emailAddress ?? "—"}
+            </div>
+            <p className="text-xs text-neutral-400 mt-1">E-mail da sua conta Foodpronto.</p>
           </div>
 
           <div className="pt-4">

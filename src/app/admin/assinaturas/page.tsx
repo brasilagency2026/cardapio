@@ -114,6 +114,23 @@ export default function AdminAssinaturasPage() {
                 </div>
                 <p className="text-neutral-500 text-xs">{r.city} – {r.state} · /{r.slug}</p>
                 <p className="text-neutral-400 text-xs mt-1">{PLAN_LABELS[r.plan]}</p>
+                <div className="flex flex-wrap gap-3 mt-1.5">
+                  {r.ownerEmail && (
+                    <a href={`mailto:${r.ownerEmail}`} className="text-xs text-blue-400 hover:underline">
+                      ✉ {r.ownerEmail}
+                    </a>
+                  )}
+                  {r.ownerWhatsapp && (
+                    <a
+                      href={`https://wa.me/55${r.ownerWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent("Olá! Sou da equipe Foodpronto.")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-green-400 hover:underline"
+                    >
+                      📱 {r.ownerWhatsapp}
+                    </a>
+                  )}
+                </div>
               </div>
 
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${sc.bg} ${sc.color}`}>

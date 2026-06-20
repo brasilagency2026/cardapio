@@ -13,6 +13,8 @@ export const create = mutation({
     city: v.optional(v.string()),
     state: v.optional(v.string()),
     plan: v.union(v.literal("DIGITAL_MENU"), v.literal("RESTAURANT_SMART")),
+    ownerEmail: v.optional(v.string()),
+    ownerWhatsapp: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Verifica slug único
