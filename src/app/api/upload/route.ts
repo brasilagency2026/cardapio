@@ -79,7 +79,7 @@ async function r2PutObject(opts: {
       'x-amz-content-sha256': payloadHash,
       'x-amz-date': amzDate,
     },
-    body,
+    body: body as unknown as BodyInit,
   });
 
   if (!response.ok) {
