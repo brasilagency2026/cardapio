@@ -69,6 +69,8 @@ export const update = mutation({
     address: v.optional(v.string()),
     city: v.optional(v.string()),
     logo: v.optional(v.string()),
+    ownerEmail: v.optional(v.string()),
+    ownerWhatsapp: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...fields } = args;

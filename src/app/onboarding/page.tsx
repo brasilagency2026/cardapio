@@ -53,6 +53,7 @@ export default function OnboardingPage() {
     userMemberships: { infinite: true },
   });
   const createRestaurant = useMutation(api.restaurants.create);
+  const updateRestaurant = useMutation(api.restaurants.update);
 
   const [name, setName] = useState("");
   const [state, setState] = useState("");
@@ -96,16 +97,28 @@ export default function OnboardingPage() {
       const slug = `${state.toLowerCase()}-${sanitizeSlug(city)}-${sanitizeSlug(name)}`;
 
       // 3. Salvar no Convex
-      await createRestaurant({
+      const restaurantId = await createRestaurant({
         clerkOrgId: orgId,
         name,
         slug,
         city,
         state,
         plan: "DIGITAL_MENU",
-        ownerEmail: user?.primaryEmailAddress?.emailAddress ?? undefined,
-        ownerWhatsapp: whatsapp.trim() || undefined,
       });
+
+      // 4. Salvar email e whatsapp separadamente (via update)
+      const ownerEmail = user?.primaryEmailAddress?.emailAddress;
+      if (restaurantId) {
+        try {
+          await updateRestaurant({
+            id: restaurantId as any,
+            ...(ownerEmail ? { ownerEmail } : {}),
+            ...(whatsapp.trim() ? { ownerWhatsapp: whatsapp.trim() } : {}),
+          });
+        } catch {
+          // Não bloqueia o onboarding se o deploy ainda não foi feito
+        }
+      }
 
       // 4. Redirecionar para escolha de planos
       router.push("/planos");
