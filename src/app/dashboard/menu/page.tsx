@@ -6,6 +6,7 @@ import { useOrganization } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { PlusIcon, EditIcon, Trash2Icon, XIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useConvexUpload } from "@/hooks/useConvexUpload";
 
 export default function MenuPage() {
   const { organization, isLoaded: isOrgLoaded } = useOrganization();
@@ -59,6 +60,7 @@ export default function MenuPage() {
   const deleteCategory = useMutation(api.products.deleteCategory);
   const updateProduct = useMutation(api.products.updateProduct);
   const deleteProduct = useMutation(api.products.deleteProduct);
+  const { uploadImage } = useConvexUpload();
 
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,28 +90,12 @@ export default function MenuPage() {
     try {
       let imageUrl = undefined;
       
-      // Upload image if provided
+      // Upload image via Convex File Storage
       if (productForm.image) {
-        const formData = new FormData();
-        formData.append('file', productForm.image);
-        
         try {
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (uploadRes.ok) {
-            const { url } = await uploadRes.json();
-            imageUrl = url;
-          } else {
-            const error = await uploadRes.json();
-            console.error('Upload error:', error);
-            toast.error(`Erro ao fazer upload da imagem: ${error.error || 'Unknown error'}`);
-          }
-        } catch (uploadError) {
-          console.error('Upload failed:', uploadError);
-          toast.error('Erro ao fazer upload da imagem.');
+          imageUrl = await uploadImage(productForm.image);
+        } catch (uploadError: any) {
+          toast.error(uploadError.message ?? "Erro ao fazer upload da imagem.");
         }
       }
 
@@ -206,28 +192,12 @@ export default function MenuPage() {
     try {
       let imageUrl = editProductForm.imagePreview;
       
-      // Upload image if provided
+      // Upload image via Convex File Storage
       if (editProductForm.image) {
-        const formData = new FormData();
-        formData.append('file', editProductForm.image);
-        
         try {
-          const uploadRes = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (uploadRes.ok) {
-            const { url } = await uploadRes.json();
-            imageUrl = url;
-          } else {
-            const error = await uploadRes.json();
-            console.error('Upload error:', error);
-            toast.error(`Erro ao fazer upload da imagem: ${error.error || 'Unknown error'}`);
-          }
-        } catch (uploadError) {
-          console.error('Upload failed:', uploadError);
-          toast.error('Erro ao fazer upload da imagem.');
+          imageUrl = await uploadImage(editProductForm.image);
+        } catch (uploadError: any) {
+          toast.error(uploadError.message ?? "Erro ao fazer upload da imagem.");
         }
       }
 

@@ -50,6 +50,10 @@ export default function MenuPage() {
     api.tables.getByNumber,
     restaurant?._id ? { restaurantId: restaurant._id, number: tableNumber } : "skip"
   );
+  const logoUrl = useQuery(
+    api.restaurants.getLogoUrl,
+    restaurant?.logo ? { storageId: restaurant.logo } : "skip"
+  );
 
   const openTab = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
@@ -156,7 +160,7 @@ export default function MenuPage() {
           <div className="flex items-center gap-3 mb-3">
             {restaurant.logo ? (
               <img
-                src={restaurant.logo}
+                src={logoUrl ?? restaurant.logo}
                 alt={restaurant.name}
                 className="w-10 h-10 rounded-lg object-cover"
               />

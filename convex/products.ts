@@ -81,11 +81,16 @@ export const listProducts = query({
       )
       .collect();
 
-    // Enriquecer com categoria
+    // Enriquecer com categoria e URL da imagem
     return await Promise.all(
       products.map(async (p) => {
         const category = await ctx.db.get(p.categoryId);
-        return { ...p, category };
+        let imageUrl = p.image ?? null;
+        // Se a imagem for um storageId do Convex (não começa com http/data)
+        if (p.image && !p.image.startsWith("http") && !p.image.startsWith("data:")) {
+          imageUrl = await ctx.storage.getUrl(p.image as any) ?? null;
+        }
+        return { ...p, image: imageUrl, category };
       })
     );
   },

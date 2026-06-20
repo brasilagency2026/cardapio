@@ -153,3 +153,39 @@ export const adminDelete = mutation({
     return await ctx.db.delete(args.id);
   },
 });
+
+// ─── File Storage: gerar URL de upload ───────────────────────────
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+// ─── File Storage: salvar storageId do logo ───────────────────────
+export const saveLogo = mutation({
+  args: {
+    id: v.id("restaurants"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.id, { logo: args.storageId });
+  },
+});
+
+// ─── File Storage: obter URL pública do logo ─────────────────────
+export const getLogoUrl = query({
+  args: { storageId: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    if (!args.storageId) return null;
+    // storageId pode ser uma URL externa ou um ID do storage Convex
+    if (args.storageId.startsWith("http") || args.storageId.startsWith("data:")) {
+      return args.storageId;
+    }
+    try {
+      return await ctx.storage.getUrl(args.storageId as any);
+    } catch {
+      return null;
+    }
+  },
+});

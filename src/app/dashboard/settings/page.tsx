@@ -33,25 +33,41 @@ export default function DashboardSettingsPage() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const updateRestaurant = useMutation(api.restaurants.update);
+  const generateUploadUrl = useMutation(api.restaurants.generateUploadUrl);
+  const saveLogo = useMutation(api.restaurants.saveLogo);
+  const logoUrl = useQuery(
+    api.restaurants.getLogoUrl,
+    restaurant?.logo ? { storageId: restaurant.logo } : "skip"
+  );
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !restaurant?._id) return;
 
-    // Preview local
+    // Preview local immédiat
     const reader = new FileReader();
     reader.onload = (ev) => setLogoPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
 
     setLogoUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Erro no upload");
+      // 1. Obter URL de upload do Convex
+      const uploadUrl = await generateUploadUrl();
 
-      await updateRestaurant({ id: restaurant._id as Id<"restaurants">, logo: data.url });
+      // 2. Fazer upload direto para o Convex
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!res.ok) throw new Error("Erro no upload");
+
+      const { storageId } = await res.json();
+
+      // 3. Salvar storageId no restaurante
+      await saveLogo({ id: restaurant._id as Id<"restaurants">, storageId });
+
       toast.success("Logo atualizado com sucesso!");
     } catch (err: any) {
       toast.error(err.message ?? "Erro ao salvar logo");
@@ -61,7 +77,7 @@ export default function DashboardSettingsPage() {
     }
   }
 
-  const currentLogo = logoPreview ?? restaurant?.logo ?? null;
+  const currentLogo = logoPreview ?? logoUrl ?? null;
 
   // ─── QR Code State ──────────────────────────────────────────────
   const [qrTarget, setQrTarget] = useState<QrTarget>("menu");
