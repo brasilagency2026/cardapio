@@ -1,86 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createHmac, createHash } from 'crypto';
 
-/**
- * Upload image to Cloudflare R2 OR fallback to data URL
- * 
- * Requires for R2 setup:
- * - CLOUDFLARE_ACCOUNT_ID (Account ID)
- * - CLOUDFLARE_API_TOKEN (API token with R2 permissions)
- * - CLOUDFLARE_R2_BUCKET_NAME (Bucket name)
- * - CLOUDFLARE_R2_DOMAIN (Optional: custom domain, defaults to {bucket}.r2.io)
- * 
- * Fallback: If R2 is not configured, uses data URL (embedded base64)
- */
+// ─── AWS Signature V4 pour Cloudflare R2 ─────────────────────────
+
+function sha256hex(data: string | Buffer): string {
+  return createHash('sha256').update(data).digest('hex');
+}
+
+function hmacSha256(key: Buffer | string, data: string): Buffer {
+  return createHmac('sha256', key).update(data).digest();
+}
+
+function getSigningKey(secretKey: string, date: string, region: string, service: string): Buffer {
+  const kDate    = hmacSha256(`AWS4${secretKey}`, date);
+  const kRegion  = hmacSha256(kDate, region);
+  const kService = hmacSha256(kRegion, service);
+  const kSigning = hmacSha256(kService, 'aws4_request');
+  return kSigning;
+}
+
+async function r2PutObject(opts: {
+  accountId: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucketName: string;
+  key: string;
+  body: Buffer;
+  contentType: string;
+}): Promise<void> {
+  const { accountId, accessKeyId, secretAccessKey, bucketName, key, body, contentType } = opts;
+
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '').slice(0, 15) + 'Z';
+  const dateStamp = amzDate.slice(0, 8);
+  const region = 'auto';
+  const service = 's3';
+
+  const host = `${accountId}.r2.cloudflarestorage.com`;
+  const url = `https://${host}/${bucketName}/${key}`;
+
+  const payloadHash = sha256hex(body);
+  const canonicalHeaders =
+    `content-type:${contentType}\n` +
+    `host:${host}\n` +
+    `x-amz-content-sha256:${payloadHash}\n` +
+    `x-amz-date:${amzDate}\n`;
+  const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
+
+  const canonicalRequest = [
+    'PUT',
+    `/${bucketName}/${key}`,
+    '',
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+  ].join('\n');
+
+  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+  const stringToSign = [
+    'AWS4-HMAC-SHA256',
+    amzDate,
+    credentialScope,
+    sha256hex(canonicalRequest),
+  ].join('\n');
+
+  const signingKey = getSigningKey(secretAccessKey, dateStamp, region, service);
+  const signature = createHmac('sha256', signingKey).update(stringToSign).digest('hex');
+
+  const authorization =
+    `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, ` +
+    `SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': authorization,
+      'Content-Type': contentType,
+      'x-amz-content-sha256': payloadHash,
+      'x-amz-date': amzDate,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`R2 ${response.status}: ${err}`);
+  }
+}
+
+// ─── Route handler ────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-    const apiToken = process.env.CLOUDFLARE_API_TOKEN;
-    const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME;
-    const r2Domain = process.env.CLOUDFLARE_R2_DOMAIN;
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Arquivo muito grande. Máximo 5MB.' }, { status: 400 });
+    }
 
-    // Check if R2 is properly configured
-    const r2Configured = !!(accountId && apiToken && bucketName);
+    const accountId       = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const accessKeyId     = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
+    const bucketName      = process.env.CLOUDFLARE_R2_BUCKET_NAME;
+    const r2Domain        = process.env.CLOUDFLARE_R2_DOMAIN;
+
+    const r2Configured = !!(accountId && accessKeyId && secretAccessKey && bucketName);
 
     if (r2Configured) {
-      // Upload to Cloudflare R2
-      const timestamp = Date.now();
-      const filename = `${timestamp}-${file.name.replace(/\s+/g, '-')}`;
-      
-      // Determine the public URL for the image
-      const domain = r2Domain || `${bucketName}.r2.io`;
-      const publicUrl = `https://${domain}/${filename}`;
+      try {
+        const timestamp = Date.now();
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+        const key = `uploads/${timestamp}.${ext}`;
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-      // Upload to Cloudflare R2 API endpoint
-      const uploadUrl = `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${filename}`;
+        await r2PutObject({
+          accountId: accountId!,
+          accessKeyId: accessKeyId!,
+          secretAccessKey: secretAccessKey!,
+          bucketName: bucketName!,
+          key,
+          body: buffer,
+          contentType: file.type || 'image/jpeg',
+        });
 
-      const buffer = await file.arrayBuffer();
-      
-      console.log('Uploading to R2:', { uploadUrl, publicUrl, filename, fileSize: file.size });
-      
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-          'Content-Type': file.type,
-        },
-        body: buffer,
-      });
+        const domain = r2Domain ?? `${bucketName}.r2.dev`;
+        const publicUrl = `https://${domain}/${key}`;
 
-      if (!response.ok) {
-        const error = await response.text();
-        console.error('R2 upload failed:', error, { status: response.status });
-        throw new Error(`R2 upload failed: ${response.status}`);
+        return NextResponse.json({ url: publicUrl, filename: key, storage: 'r2' });
+      } catch (r2Error) {
+        console.error('R2 upload failed, using base64 fallback:', r2Error);
+        // Fallback automático
       }
-
-      console.log('R2 upload successful:', { publicUrl });
-
-      return NextResponse.json({
-        url: publicUrl,
-        filename: filename,
-        storage: 'r2',
-      });
-    } else {
-      // Fallback: Use data URL (base64 encoded image)
-      console.warn('R2 not configured, using data URL fallback');
-      
-      const buffer = await file.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      const dataUrl = `data:${file.type};base64,${base64}`;
-
-      return NextResponse.json({
-        url: dataUrl,
-        filename: file.name,
-        storage: 'dataurl',
-        warning: 'Images are stored as base64 data URLs. Configure Cloudflare R2 for better performance.',
-      });
     }
+
+    // Fallback: base64 data URL
+    const buffer = await file.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
+
+    return NextResponse.json({ url: dataUrl, filename: file.name, storage: 'dataurl' });
+
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
