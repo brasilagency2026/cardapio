@@ -152,6 +152,9 @@ export default function MenuPage() {
     );
   }
 
+  // Apenas RESTAURANT_SMART permite fazer pedidos
+  const canOrder = restaurant.plan === "RESTAURANT_SMART";
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header restaurante */}
@@ -229,7 +232,7 @@ export default function MenuPage() {
             </div>
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
               {featuredProducts.map((p) => (
-                <FeaturedCard key={p._id} product={p} onAdd={addToCart} />
+                <FeaturedCard key={p._id} product={p} onAdd={addToCart} canOrder={canOrder} />
               ))}
             </div>
           </section>
@@ -246,7 +249,7 @@ export default function MenuPage() {
               <h2 className="font-semibold text-gray-900 mb-3">{cat.name}</h2>
               <div className="space-y-3">
                 {catProducts.map((p) => (
-                  <ProductRow key={p._id} product={p} onAdd={addToCart} />
+                  <ProductRow key={p._id} product={p} onAdd={addToCart} canOrder={canOrder} />
                 ))}
               </div>
             </section>
@@ -254,8 +257,8 @@ export default function MenuPage() {
         })}
       </div>
 
-      {/* Botão carrinho flutuante */}
-      {cartCount > 0 && (
+      {/* Botão carrinho flutuante — só para RESTAURANT_SMART */}
+      {canOrder && cartCount > 0 && (
         <div className="fixed bottom-6 left-0 right-0 px-4 z-30">
           <button
             onClick={() => setCartOpen(true)}
@@ -272,8 +275,8 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* Modal carrinho */}
-      {cartOpen && (
+      {/* Modal carrinho — só para RESTAURANT_SMART */}
+      {canOrder && cartOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-end">
           <div className="bg-white w-full max-w-2xl mx-auto rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
@@ -358,7 +361,7 @@ export default function MenuPage() {
   );
 }
 
-function FeaturedCard({ product, onAdd }: { product: any; onAdd: (p: any) => void }) {
+function FeaturedCard({ product, onAdd, canOrder }: { product: any; onAdd: (p: any) => void; canOrder: boolean }) {
   return (
     <div className="min-w-[160px] bg-white rounded-2xl border border-gray-100 overflow-hidden">
       {product.image ? (
@@ -378,19 +381,21 @@ function FeaturedCard({ product, onAdd }: { product: any; onAdd: (p: any) => voi
           <span className="text-red-500 font-semibold text-sm">
             {formatCurrency(product.price / 100)}
           </span>
-          <button
-            onClick={() => onAdd(product)}
-            className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center"
-          >
-            <PlusIcon className="w-3.5 h-3.5 text-white" />
-          </button>
+          {canOrder && (
+            <button
+              onClick={() => onAdd(product)}
+              className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center"
+            >
+              <PlusIcon className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function ProductRow({ product, onAdd }: { product: any; onAdd: (p: any) => void }) {
+function ProductRow({ product, onAdd, canOrder }: { product: any; onAdd: (p: any) => void; canOrder: boolean }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4">
       {product.image ? (
@@ -419,12 +424,14 @@ function ProductRow({ product, onAdd }: { product: any; onAdd: (p: any) => void 
         )}
         <div className="flex items-center justify-between mt-2">
           <span className="font-bold text-red-500">{formatCurrency(product.price / 100)}</span>
-          <button
-            onClick={() => onAdd(product)}
-            className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
-          >
-            <PlusIcon className="w-4 h-4 text-white" />
-          </button>
+          {canOrder && (
+            <button
+              onClick={() => onAdd(product)}
+              className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
+            >
+              <PlusIcon className="w-4 h-4 text-white" />
+            </button>
+          )}
         </div>
       </div>
     </div>
