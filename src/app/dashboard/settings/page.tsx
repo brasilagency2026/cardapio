@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useOrganization } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { DownloadIcon, QrCodeIcon, TableIcon } from "lucide-react";
+import { DownloadIcon, QrCodeIcon, TableIcon, UploadIcon, ImageIcon, CheckIcon } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
 
 type QrTarget = "menu" | "table";
 
@@ -27,6 +28,40 @@ export default function DashboardSettingsPage() {
   const publicMenuUrl = restaurant
     ? `https://cardapio.foodpronto.com.br/${restaurant.slug}`
     : "#";
+
+  // ─── Logo upload state ───────────────────────────────────────────
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const updateRestaurant = useMutation(api.restaurants.update);
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !restaurant?._id) return;
+
+    // Preview local
+    const reader = new FileReader();
+    reader.onload = (ev) => setLogoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Erro no upload");
+
+      await updateRestaurant({ id: restaurant._id as Id<"restaurants">, logo: data.url });
+      toast.success("Logo atualizado com sucesso!");
+    } catch (err: any) {
+      toast.error(err.message ?? "Erro ao salvar logo");
+      setLogoPreview(null);
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  const currentLogo = logoPreview ?? restaurant?.logo ?? null;
 
   // ─── QR Code State ──────────────────────────────────────────────
   const [qrTarget, setQrTarget] = useState<QrTarget>("menu");
@@ -228,11 +263,63 @@ export default function DashboardSettingsPage() {
             )}
           </section>
 
+          {/* ─── Logo Section ──────────────────────────────── */}
+          <section className="rounded-3xl border border-gray-200 bg-gray-50 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-1">Logo do restaurante</h2>
+            <p className="text-sm text-gray-500 mb-5">
+              Aparece no cabeçalho do cardápio digital e na listagem. Formato JPG, PNG ou WebP. Tamanho recomendado: 200×200px.
+            </p>
+
+            <div className="flex items-center gap-6">
+              {/* Preview */}
+              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-300 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                {currentLogo ? (
+                  <img src={currentLogo} alt="Logo" className="w-full h-full object-cover rounded-2xl" />
+                ) : (
+                  <ImageIcon className="w-8 h-8 text-gray-300" />
+                )}
+              </div>
+
+              {/* Upload button */}
+              <div className="flex flex-col gap-2">
+                <label className={`cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                  logoUploading
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                }`}>
+                  {logoUploading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon className="w-4 h-4" />
+                      {currentLogo ? "Trocar logo" : "Fazer upload do logo"}
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={logoUploading}
+                    onChange={handleLogoUpload}
+                  />
+                </label>
+                {currentLogo && !logoUploading && (
+                  <p className="text-xs text-green-600 flex items-center gap-1">
+                    <CheckIcon className="w-3 h-3" /> Logo salvo
+                  </p>
+                )}
+                <p className="text-xs text-gray-400">Máx. 5MB · JPG, PNG, WebP</p>
+              </div>
+            </div>
+          </section>
+
           <section className="rounded-3xl border border-gray-200 bg-gray-50 p-6">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Link público</h2>
-                <p className="text-sm text-gray-500">
+                <h2 className="text-xl font-semibold text-gray-900">Link público</h2>                <p className="text-sm text-gray-500">
                   Os clientes acessam o seu cardápio através deste endereço.
                 </p>
               </div>
