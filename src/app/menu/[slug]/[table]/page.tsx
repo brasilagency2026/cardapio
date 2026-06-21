@@ -15,7 +15,20 @@ import {
   ClockIcon,
   XIcon,
   SendIcon,
+  ReceiptIcon,
+  CheckCircleIcon,
+  ChefHatIcon,
+  TruckIcon,
+  CircleDotIcon,
 } from "lucide-react";
+
+const ORDER_STATUS: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  PENDING:   { label: "Aguardando",  color: "text-blue-500",  icon: <CircleDotIcon className="w-4 h-4" /> },
+  ACCEPTED:  { label: "Aceito",      color: "text-amber-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
+  PREPARING: { label: "Preparando",  color: "text-orange-500", icon: <ChefHatIcon className="w-4 h-4" /> },
+  READY:     { label: "Pronto! 🎉",  color: "text-green-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
+  DELIVERED: { label: "Entregue",    color: "text-gray-400",  icon: <TruckIcon className="w-4 h-4" /> },
+};
 
 type CartItem = {
   productId: string;
@@ -32,6 +45,7 @@ export default function MenuPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [ordersOpen, setOrdersOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [ordering, setOrdering] = useState(false);
@@ -54,6 +68,17 @@ export default function MenuPage() {
     api.restaurants.getLogoUrl,
     restaurant?.logo ? { storageId: restaurant.logo } : "skip"
   );
+
+  // Commandes de cette table (temps réel)
+  const tableOrders = useQuery(
+    api.orders.listByTable,
+    table?._id ? { tableId: table._id } : "skip"
+  );
+
+  // Commandes actives (non livrées) pour le badge
+  const activeTableOrders = tableOrders?.filter(
+    (o) => !["DELIVERED", "CANCELLED"].includes(o.status)
+  ) ?? [];
 
   const openTab = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
@@ -180,12 +205,27 @@ export default function MenuPage() {
                 {restaurant.name.charAt(0)}
               </div>
             )}
-            <div>
+            <div className="flex-1">
               <h1 className="font-semibold text-gray-900">{restaurant.name}</h1>
               {restaurant.plan === "RESTAURANT_SMART" && tableNumber > 0 && (
                 <p className="text-xs text-gray-400">Mesa {tableNumber}</p>
               )}
             </div>
+            {/* Botão Meus Pedidos — só para RESTAURANT_SMART com mesa válida */}
+            {canOrder && (
+              <button
+                onClick={() => setOrdersOpen(true)}
+                className="relative flex items-center gap-1.5 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <ReceiptIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Pedidos</span>
+                {activeTableOrders.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                    {activeTableOrders.length}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
           {/* Busca */}
           <div className="relative">
@@ -299,38 +339,17 @@ export default function MenuPage() {
 
             <div className="space-y-3 mb-6">
               {cart.map((item) => (
-                <div
-                  key={item.productId}
-                  className="flex items-center justify-between"
-                >
+                <div key={item.productId} className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800">
-                      {item.productName}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {formatCurrency(item.unitPrice)} cada
-                    </p>
+                    <p className="text-sm font-medium text-gray-800">{item.productName}</p>
+                    <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice)} cada</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => removeFromCart(item.productId)}
-                      className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center"
-                    >
+                    <button onClick={() => removeFromCart(item.productId)} className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center">
                       <MinusIcon className="w-3 h-3" />
                     </button>
-                    <span className="text-sm font-medium w-4 text-center">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        addToCart({
-                          _id: item.productId,
-                          name: item.productName,
-                          price: item.unitPrice * 100,
-                        })
-                      }
-                      className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center"
-                    >
+                    <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
+                    <button onClick={() => addToCart({ _id: item.productId, name: item.productName, price: item.unitPrice * 100 })} className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center">
                       <PlusIcon className="w-3 h-3 text-white" />
                     </button>
                     <span className="text-sm font-semibold text-gray-900 min-w-[60px] text-right">
@@ -344,9 +363,7 @@ export default function MenuPage() {
             <div className="border-t border-gray-100 pt-4 mb-4">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-700">Total</span>
-                <span className="font-bold text-xl text-gray-900">
-                  {formatCurrency(cartTotal)}
-                </span>
+                <span className="font-bold text-xl text-gray-900">{formatCurrency(cartTotal)}</span>
               </div>
             </div>
 
@@ -362,6 +379,75 @@ export default function MenuPage() {
               )}
               {ordering ? "Enviando..." : "Enviar pedido para a cozinha"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Meus Pedidos */}
+      {canOrder && ordersOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 flex items-end">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-semibold text-gray-900 text-lg">Meus pedidos</h2>
+              <button
+                onClick={() => setOrdersOpen(false)}
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
+              >
+                <XIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {!tableOrders || tableOrders.length === 0 ? (
+              <div className="text-center py-10">
+                <ReceiptIcon className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">Nenhum pedido realizado ainda.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {tableOrders.filter(o => o.status !== "CANCELLED").map((order: any) => {
+                  const st = ORDER_STATUS[order.status] ?? ORDER_STATUS.PENDING;
+                  const isReady = order.status === "READY";
+                  return (
+                    <div
+                      key={order._id}
+                      className={`border rounded-2xl p-4 ${isReady ? "border-green-300 bg-green-50" : "border-gray-100 bg-white"}`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`flex items-center gap-1.5 text-sm font-medium ${st.color}`}>
+                          {st.icon}
+                          {st.label}
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          {new Date(order.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {order.items?.map((item: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-700">
+                              <span className="text-gray-400 mr-1">{item.quantity}x</span>
+                              {item.productName}
+                            </span>
+                            <span className="text-gray-500 text-xs">
+                              {formatCurrency((item.unitPrice * item.quantity) / 100)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {order.notes && (
+                        <p className="text-xs text-amber-600 mt-2 italic">⚠ {order.notes}</p>
+                      )}
+                      <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-gray-400">Total do pedido</span>
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {formatCurrency(order.total / 100)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
