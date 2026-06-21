@@ -155,3 +155,24 @@ export const freeTable = mutation({
     return args.id;
   },
 });
+
+// ─── Chamar garçom (notificação) ──────────────────────────────────
+export const callWaiter = mutation({
+  args: {
+    restaurantId: v.id("restaurants"),
+    tableId: v.id("tables"),
+    tableNumber: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("notifications", {
+      restaurantId: args.restaurantId,
+      type: "table.waiting_payment" as any,
+      message: `Mesa ${args.tableNumber} está chamando o garçom`,
+      targetRole: "WAITER",
+      relatedId: args.tableId,
+      read: false,
+      createdAt: Date.now(),
+    });
+    return true;
+  },
+});

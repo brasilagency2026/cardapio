@@ -101,6 +101,7 @@ export default function MenuPage() {
   const createOrder = useMutation(api.orders.create);
   const getOrCreateTable = useMutation(api.tables.getOrCreate);
   const requestPayment = useMutation(api.tabs.requestPayment);
+  const callWaiter = useMutation(api.tables.callWaiter);
 
   const filteredProducts = products?.filter((p) => {
     if (!p.available) return false;
@@ -230,6 +231,29 @@ export default function MenuPage() {
                 <p className="text-xs text-gray-400">Mesa {tableNumber}</p>
               )}
             </div>
+            {/* Botão Chamar garçom — só para RESTAURANT_SMART com mesa válida */}
+            {canOrder && (
+              <button
+                onClick={async () => {
+                  if (!restaurant?._id || !table?._id) return;
+                  try {
+                    await callWaiter({
+                      restaurantId: restaurant._id,
+                      tableId: table._id as any,
+                      tableNumber,
+                    });
+                    toast.success("🛎️ Garçom chamado à mesa!");
+                  } catch {
+                    toast.error("Erro ao chamar garçom");
+                  }
+                }}
+                className="flex items-center gap-1 border border-amber-300 bg-amber-50 rounded-xl px-3 py-2 text-sm text-amber-700 hover:bg-amber-100 transition-colors"
+                title="Chamar garçom"
+              >
+                <span>🛎️</span>
+                <span className="hidden sm:inline">Garçom</span>
+              </button>
+            )}
             {/* Botão Meus Pedidos — só para RESTAURANT_SMART com mesa válida */}
             {canOrder && (
               <button
