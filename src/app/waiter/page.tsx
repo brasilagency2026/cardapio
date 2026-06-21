@@ -299,7 +299,7 @@ export default function WaiterPage() {
                   ) ?? [])];
                   
                   // Buscar via tabsWithTables se disponível, senão usar o que temos
-                  const tabData = tabsWithOrders?.find(t => t.table?._id === table._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT"));
+                  const tabData = tabsWithOrders?.find((t: any) => t.tableId === table._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT"));
                   
                   // Usar total da comanda (que inclui todas as commandes)
                   const total = tabData?.total ?? allTableOrders.reduce((sum, o) => sum + o.total, 0);
@@ -477,7 +477,7 @@ export default function WaiterPage() {
               {(() => {
                 // Usar tabsWithOrders para pegar TODAS as commandes (incluindo DELIVERED)
                 const tabData = tabsWithOrders?.find(
-                  (t) => t.table?._id === selectedTable._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT")
+                  (t: any) => t.tableId === selectedTable._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT")
                 );
                 const orders = tabData?.orders?.filter((o: any) => o.status !== "CANCELLED") ?? [];
                 const total = tabData?.total ?? orders.reduce((sum: number, o: any) => sum + o.total, 0);
