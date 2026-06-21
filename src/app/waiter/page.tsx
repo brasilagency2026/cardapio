@@ -475,9 +475,12 @@ export default function WaiterPage() {
             <div className="p-5 space-y-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Resumo do consumo</h3>
               {(() => {
-                const orders = activeOrders?.filter(
-                  (o) => (o as any).table?._id === selectedTable._id && o.status !== "CANCELLED"
-                ) ?? [];
+                // Usar tabsWithOrders para pegar TODAS as commandes (incluindo DELIVERED)
+                const tabData = tabsWithOrders?.find(
+                  (t) => t.table?._id === selectedTable._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT")
+                );
+                const orders = tabData?.orders?.filter((o: any) => o.status !== "CANCELLED") ?? [];
+                const total = tabData?.total ?? orders.reduce((sum: number, o: any) => sum + o.total, 0);
                 const total = orders.reduce((sum, o) => sum + o.total, 0);
                 const allItems: { name: string; qty: number; subtotal: number }[] = [];
 
