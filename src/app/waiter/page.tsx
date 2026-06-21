@@ -481,7 +481,6 @@ export default function WaiterPage() {
                 );
                 const orders = tabData?.orders?.filter((o: any) => o.status !== "CANCELLED") ?? [];
                 const total = tabData?.total ?? orders.reduce((sum: number, o: any) => sum + o.total, 0);
-                const total = orders.reduce((sum, o) => sum + o.total, 0);
                 const allItems: { name: string; qty: number; subtotal: number }[] = [];
 
                 orders.forEach((o: any) => {
