@@ -260,3 +260,53 @@ export const dailyPayments = query({
     };
   },
 });
+
+// ─── Ranking dos itens mais vendidos no dia ───────────────────────
+export const dailyTopItems = query({
+  args: {
+    restaurantId: v.id("restaurants"),
+    date: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const endOfDay = args.date + 24 * 60 * 60 * 1000;
+
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_restaurant_date", (q) =>
+        q.eq("restaurantId", args.restaurantId).gte("createdAt", args.date)
+      )
+      .filter((q) =>
+        q.and(
+          q.lt(q.field("createdAt"), endOfDay),
+          q.neq(q.field("status"), "CANCELLED")
+        )
+      )
+      .collect();
+
+    // Buscar itens de todos os pedidos
+    const ranking: Record<string, { name: string; quantity: number; revenue: number }> = {};
+
+    for (const order of orders) {
+      const items = await ctx.db
+        .query("orderItems")
+        .withIndex("by_order", (q) => q.eq("orderId", order._id))
+        .collect();
+
+      for (const item of items) {
+        if (ranking[item.productName]) {
+          ranking[item.productName].quantity += item.quantity;
+          ranking[item.productName].revenue += item.subtotal;
+        } else {
+          ranking[item.productName] = {
+            name: item.productName,
+            quantity: item.quantity,
+            revenue: item.subtotal,
+          };
+        }
+      }
+    }
+
+    // Ordenar por quantidade vendida (desc)
+    return Object.values(ranking).sort((a, b) => b.quantity - a.quantity);
+  },
+});

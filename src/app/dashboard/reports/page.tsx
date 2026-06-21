@@ -40,6 +40,13 @@ export default function ReportsPage() {
       : "skip"
   );
 
+  const topItems = useQuery(
+    api.orders.dailyTopItems,
+    restaurant?._id
+      ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
+      : "skip"
+  );
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = new Date(e.target.value + "T00:00:00");
     date.setHours(0, 0, 0, 0);
@@ -184,6 +191,41 @@ export default function ReportsPage() {
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">
             Nenhum pagamento registrado neste dia.
+          </p>
+        )}
+      </div>
+
+      {/* Ranking des itens les plus vendus */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">🏆 Itens mais vendidos</h2>
+        {topItems && topItems.length > 0 ? (
+          <div className="space-y-2">
+            {topItems.slice(0, 10).map((item: any, i: number) => (
+              <div
+                key={item.name}
+                className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0"
+              >
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                  i === 0 ? "bg-amber-100 text-amber-700" :
+                  i === 1 ? "bg-gray-200 text-gray-600" :
+                  i === 2 ? "bg-orange-100 text-orange-600" :
+                  "bg-gray-100 text-gray-500"
+                }`}>
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                  <p className="text-xs text-gray-400">{formatCurrency(item.revenue / 100)} de receita</p>
+                </div>
+                <span className="text-sm font-bold text-gray-700 shrink-0">
+                  {item.quantity}x
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">
+            Nenhum item vendido neste dia.
           </p>
         )}
       </div>
