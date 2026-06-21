@@ -200,6 +200,7 @@ export default function ReportsPage() {
                 <tr className="text-left text-gray-500 border-b border-gray-100">
                   <th className="pb-3 font-medium">Horário</th>
                   <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-medium">Pagamento</th>
                   <th className="pb-3 font-medium text-right">Total</th>
                 </tr>
               </thead>
@@ -228,6 +229,18 @@ export default function ReportsPage() {
                             ? "Cancelado"
                             : order.status}
                       </span>
+                    </td>
+                    <td className="py-3">
+                      {order.paymentMethod ? (
+                        <span className="text-xs text-gray-600">
+                          {order.paymentMethod === "PIX" && "📲 PIX"}
+                          {order.paymentMethod === "CREDIT" && "💳 Crédito"}
+                          {order.paymentMethod === "DEBIT" && "💳 Débito"}
+                          {order.paymentMethod === "CASH" && "💵 Dinheiro"}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
                     </td>
                     <td className="py-3 text-right font-medium text-gray-900">
                       {formatCurrency(order.total / 100)}

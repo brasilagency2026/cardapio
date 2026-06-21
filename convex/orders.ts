@@ -200,8 +200,19 @@ export const dailyReport = query({
     const total = orders.reduce((sum, o) => sum + o.total, 0);
     const ticketMedio = orders.length > 0 ? total / orders.length : 0;
 
+    // Enriquecer avec le mode de paiement via la comanda
+    const ordersWithPayment = await Promise.all(
+      orders.map(async (order) => {
+        const payment = await ctx.db
+          .query("payments")
+          .withIndex("by_tab", (q) => q.eq("tabId", order.tabId))
+          .first();
+        return { ...order, paymentMethod: payment?.method ?? null };
+      })
+    );
+
     return {
-      orders,
+      orders: ordersWithPayment,
       total,
       count: orders.length,
       ticketMedio,
