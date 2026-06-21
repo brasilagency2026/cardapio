@@ -75,12 +75,20 @@ export default function MenuPage() {
     table?._id ? { tableId: table._id } : "skip"
   );
 
-  // Commandes actives (non livrées) pour le badge
-  const activeTableOrders = tableOrders?.filter(
-    (o) => !["DELIVERED", "CANCELLED"].includes(o.status)
-  ) ?? [];
+  // Comanda ativa (OPEN) da mesa
+  const openTab = useQuery(
+    api.tabs.getOpenByTable,
+    table?._id ? { tableId: table._id } : "skip"
+  );
 
-  const openTab = useMutation(api.tabs.open);
+  // Só mostrar pedidos da comanda ativa — quando a mesa é liberada, openTab será null
+  const activeTableOrders = openTab
+    ? (tableOrders?.filter(
+        (o) => o.tabId === openTab._id && !["DELIVERED", "CANCELLED"].includes(o.status)
+      ) ?? [])
+    : [];
+
+  const openTabMutation = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
   const getOrCreateTable = useMutation(api.tables.getOrCreate);
 
@@ -144,7 +152,7 @@ export default function MenuPage() {
       });
 
       // Abrir/obter comanda
-      const tabId = await openTab({
+      const tabId = await openTabMutation({
         restaurantId: restaurant._id,
         tableId,
       });
@@ -397,14 +405,16 @@ export default function MenuPage() {
               </button>
             </div>
 
-            {!tableOrders || tableOrders.length === 0 ? (
+            {!openTab || !tableOrders || tableOrders.filter(o => o.tabId === openTab._id).length === 0 ? (
               <div className="text-center py-10">
                 <ReceiptIcon className="w-12 h-12 text-gray-200 mx-auto mb-3" />
                 <p className="text-gray-400 text-sm">Nenhum pedido realizado ainda.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {tableOrders.filter(o => o.status !== "CANCELLED").map((order: any) => {
+                {tableOrders
+                  .filter(o => o.tabId === openTab._id && o.status !== "CANCELLED")
+                  .map((order: any) => {
                   const st = ORDER_STATUS[order.status] ?? ORDER_STATUS.PENDING;
                   const isReady = order.status === "READY";
                   return (
