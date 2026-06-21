@@ -519,6 +519,7 @@ export default function MenuPage() {
                 {(() => {
                   const orders = tableOrders.filter(o => o.tabId === openTab._id && o.status !== "CANCELLED");
                   const totalGeral = orders.reduce((sum, o) => sum + o.total, 0);
+                  const allDelivered = orders.length > 0 && orders.every(o => o.status === "DELIVERED");
                   return (
                     <div className="border-t-2 border-gray-200 pt-4 space-y-4">
                       <div className="flex justify-between items-center">
@@ -534,7 +535,7 @@ export default function MenuPage() {
                           <p className="font-semibold text-amber-800 text-sm">Garçom chamado!</p>
                           <p className="text-xs text-amber-600 mt-1">Ele passará em breve para realizar o pagamento.</p>
                         </div>
-                      ) : (
+                      ) : allDelivered ? (
                         <button
                           onClick={async () => {
                             if (!openTab?._id || !table?._id) return;
@@ -558,6 +559,10 @@ export default function MenuPage() {
                           )}
                           {callingWaiter ? "Chamando..." : "Chamar garçom para pagar"}
                         </button>
+                      ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center">
+                          <p className="text-xs text-gray-500">O botão para pagar ficará disponível quando todos os pedidos forem entregues.</p>
+                        </div>
                       )}
                     </div>
                   );
