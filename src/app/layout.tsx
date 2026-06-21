@@ -13,13 +13,28 @@ export const metadata: Metadata = {
   description:
     "Plataforma SaaS de cardápio digital e gestão completa para restaurantes, bares, cafeterias e food trucks brasileiros.",
   keywords: ["cardápio digital", "qr code restaurante", "sistema restaurante", "comanda digital"],
+  metadataBase: new URL("https://cardapio.foodpronto.com.br"),
   openGraph: {
-    title: "Cardápio Foodpronto",
-    description: "Cardápio digital e gestão completa para o seu restaurante",
-    url: "https://foodpronto.com.br",
+    title: "Cardápio Foodpronto — Seu restaurante no digital em 30 minutos",
+    description: "Cardápio digital via QR Code, gestão de pedidos, mesas, cozinha e relatórios. 30 dias grátis.",
+    url: "https://cardapio.foodpronto.com.br",
     siteName: "Cardápio Foodpronto",
     locale: "pt_BR",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Cardápio Foodpronto — Cardápio Digital para Restaurantes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cardápio Foodpronto — Seu restaurante no digital em 30 minutos",
+    description: "Cardápio digital via QR Code, gestão de pedidos, mesas e cozinha. 30 dias grátis.",
+    images: ["/og-image.jpg"],
   },
 };
 
