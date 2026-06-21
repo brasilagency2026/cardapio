@@ -8,11 +8,16 @@ export const open = mutation({
     tableId: v.id("tables"),
   },
   handler: async (ctx, args) => {
-    // Verificar se já existe comanda aberta para esta mesa
+    // Verificar se já existe comanda aberta ou aguardando pagamento
     const existing = await ctx.db
       .query("tabs")
       .withIndex("by_table", (q) => q.eq("tableId", args.tableId))
-      .filter((q) => q.eq(q.field("status"), "OPEN"))
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("status"), "OPEN"),
+          q.eq(q.field("status"), "WAITING_PAYMENT")
+        )
+      )
       .first();
 
     // Sempre marcar mesa como ocupada
