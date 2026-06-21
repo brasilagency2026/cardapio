@@ -9,7 +9,6 @@ import {
   ChefHat,
   Clock,
   Zap,
-  CreditCard,
   Users,
   BarChart3,
   TableIcon,
@@ -63,7 +62,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-neutral-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Cardápio digital via QR Code, NFC e link direto. Gestão de pedidos, mesas, cozinha e pagamentos — tudo em uma única plataforma. Sem maquininha, sem complicação.
+            Cardápio digital via QR Code, NFC e link direto. Gestão de pedidos, mesas, cozinha e relatórios — tudo em uma única plataforma. Simples, rápido e sem complicação.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -149,7 +148,6 @@ export default function Home() {
               { icon: <ChefHat size={22} />, title: "Painel da Cozinha (KDS)", desc: "Tela em tempo real para a equipe de preparo." },
               { icon: <TableIcon size={22} />, title: "Gestão de mesas", desc: "Controle de status e comandas por mesa." },
               { icon: <BellRing size={22} />, title: "Notificações ao garçom", desc: "Alerta sonoro para pedidos prontos e chamadas." },
-              { icon: <CreditCard size={22} />, title: "Pagamento sem maquininha", desc: "PIX, crédito e débito via Mercado Pago." },
               { icon: <BarChart3 size={22} />, title: "Relatórios de vendas", desc: "Receita diária, ticket médio e ranking de itens." },
               { icon: <Clock size={22} />, title: "Tempo real", desc: "Tudo é atualizado em tempo real, sem refresh." },
               { icon: <Shield size={22} />, title: "Seguro e confiável", desc: "Dados protegidos, plataforma estável 24/7." },
@@ -228,7 +226,6 @@ export default function Home() {
                   "Gestão de mesas e comandas digitais",
                   "Painel KDS em tempo real para a cozinha",
                   "Painel do garçom com alertas sonoros",
-                  "Controle de pagamento (PIX, cartão, dinheiro)",
                   "Relatórios de vendas e ranking de itens",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-neutral-300">
@@ -253,10 +250,10 @@ export default function Home() {
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { emoji: "🚫", text: "Sem maquininha" },
+              { emoji: "🚫", text: "Sem app para baixar" },
               { emoji: "📱", text: "Funciona no celular" },
               { emoji: "⚡", text: "Online em 30 min" },
-              { emoji: "💰", text: "Só precisa de Mercado Pago" },
+              { emoji: "🖥️", text: "Celular, tablet ou PC" },
             ].map((item) => (
               <div key={item.text} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 text-center">
                 <span className="text-3xl block mb-3">{item.emoji}</span>
