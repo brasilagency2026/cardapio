@@ -39,6 +39,7 @@ export default function TablesPage() {
 
   const createTable = useMutation(api.tables.create);
   const updateStatus = useMutation(api.tables.updateStatus);
+  const freeTable = useMutation(api.tables.freeTable);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +63,7 @@ export default function TablesPage() {
 
   const handleFreeTable = async (tableId: string) => {
     try {
-      await updateStatus({ id: tableId as any, status: "FREE" });
+      await freeTable({ id: tableId as any });
       toast.success("Mesa liberada ✓");
     } catch {
       toast.error("Erro ao liberar mesa");

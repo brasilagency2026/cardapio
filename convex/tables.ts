@@ -133,3 +133,25 @@ export const remove = mutation({
     return await ctx.db.delete(args.id);
   },
 });
+
+// ─── Liberar mesa (fecha todas as comandas abertas) ───────────────
+export const freeTable = mutation({
+  args: { id: v.id("tables") },
+  handler: async (ctx, args) => {
+    // Fechar todas as comandas OPEN ou WAITING_PAYMENT da mesa
+    const openTabs = await ctx.db
+      .query("tabs")
+      .withIndex("by_table", (q) => q.eq("tableId", args.id))
+      .collect();
+
+    for (const tab of openTabs) {
+      if (tab.status === "OPEN" || tab.status === "WAITING_PAYMENT") {
+        await ctx.db.patch(tab._id, { status: "CLOSED", closedAt: Date.now() });
+      }
+    }
+
+    // Liberar a mesa
+    await ctx.db.patch(args.id, { status: "FREE" });
+    return args.id;
+  },
+});
