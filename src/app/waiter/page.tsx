@@ -54,13 +54,25 @@ export default function WaiterPage() {
     restaurant?._id ? { restaurantId: restaurant._id } : "skip"
   );
 
+  // Notifications non lues (appels garçom)
+  const notifications = useQuery(
+    api.notifications.listUnread,
+    restaurant?._id ? { restaurantId: restaurant._id } : "skip"
+  );
+
   const openTab = useMutation(api.tabs.open);
   const closeTab = useMutation(api.tabs.close);
   const updateOrderStatus = useMutation(api.orders.updateStatus);
+  const markNotifRead = useMutation(api.notifications.markAsRead);
 
   const readyOrders   = activeOrders?.filter((o) => o.status === "READY")   ?? [];
   const pendingOrders = activeOrders?.filter((o) => o.status === "PENDING")  ?? [];
   const waitingTables = tables?.filter((t) => t.status === "WAITING_PAYMENT") ?? [];
+
+  // Notificações de chamada do garçom (tipo "table.waiting_payment" com mensagem "chamando")
+  const waiterCalls = notifications?.filter(
+    (n) => n.message.includes("chamando o garçom")
+  ) ?? [];
 
   // Commandes de la table sélectionnée dans le modal détail
   const tableDetailOrders = tableDetailModal
@@ -125,8 +137,36 @@ export default function WaiterPage() {
       </div>
 
       {/* Alertas */}
-      {(pendingOrders.length > 0 || readyOrders.length > 0 || waitingTables.length > 0) && (
+      {(waiterCalls.length > 0 || pendingOrders.length > 0 || readyOrders.length > 0 || waitingTables.length > 0) && (
         <div className="space-y-3">
+
+          {/* ─── Appels garçom ─── */}
+          {waiterCalls.length > 0 && (
+            <div className="bg-purple-50 border border-purple-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl animate-bounce">🛎️</span>
+                <span className="font-semibold text-purple-800">
+                  {waiterCalls.length} mesa{waiterCalls.length > 1 ? "s" : ""} chamando
+                </span>
+              </div>
+              <div className="space-y-2">
+                {waiterCalls.map((notif) => (
+                  <div key={notif._id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                    <p className="font-medium text-gray-800 text-sm">{notif.message}</p>
+                    <button
+                      onClick={async () => {
+                        await markNotifRead({ id: notif._id as any });
+                        toast.success("Ok ✓");
+                      }}
+                      className="text-xs bg-purple-500 text-white px-3 py-1.5 rounded-lg hover:bg-purple-600 transition-colors"
+                    >
+                      OK, visto
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ─── Pedidos aguardando confirmação do garçom ─── */}
           {pendingOrders.length > 0 && (
