@@ -51,7 +51,9 @@ export default function MenuPage() {
   const [ordering, setOrdering] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
-  const [waiterCalled, setWaiterCalled] = useState(false);
+
+  // waiterCalled basé sur le statut réel de la comanda (pas un state local)
+  const waiterCalled = openTab?.status === "WAITING_PAYMENT";
 
   // Queries
   const restaurant = useQuery(api.restaurants.getBySlug, { slug });
@@ -539,7 +541,6 @@ export default function MenuPage() {
                             setCallingWaiter(true);
                             try {
                               await requestPayment({ id: openTab._id as any, tableId: table._id as any });
-                              setWaiterCalled(true);
                               toast.success("Garçom chamado! 🛎️");
                             } catch {
                               toast.error("Erro ao chamar garçom");
