@@ -111,7 +111,7 @@ export default function WaiterPage() {
                       </p>
                       <p className="text-xs text-gray-500">
                         {(order as any).items?.length} iten(s) ·{" "}
-                        {formatCurrency(order.total)}
+                        {formatCurrency(order.total / 100)}
                       </p>
                     </div>
                     <button

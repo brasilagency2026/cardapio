@@ -175,7 +175,7 @@ export default function DashboardPage() {
         <MetricCard
           icon={<TrendingUpIcon className="w-5 h-5 text-red-500" />}
           label="Receita hoje"
-          value={formatCurrency(dailyReport?.total ?? 0)}
+          value={formatCurrency((dailyReport?.total ?? 0) / 100)}
           bg="bg-red-50"
         />
         <MetricCard
@@ -187,7 +187,7 @@ export default function DashboardPage() {
         <MetricCard
           icon={<TrendingUpIcon className="w-5 h-5 text-purple-500" />}
           label="Ticket médio"
-          value={formatCurrency(dailyReport?.ticketMedio ?? 0)}
+          value={formatCurrency((dailyReport?.ticketMedio ?? 0) / 100)}
           bg="bg-purple-50"
         />
         <MetricCard
@@ -250,7 +250,7 @@ export default function DashboardPage() {
                     </p>
                     <p className="text-xs text-gray-400">
                       {(order as any).items?.length ?? 0} iten(s) ·{" "}
-                      {formatCurrency(order.total)}
+                      {formatCurrency(order.total / 100)}
                     </p>
                   </div>
                 </div>

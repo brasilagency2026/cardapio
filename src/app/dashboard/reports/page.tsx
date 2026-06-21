@@ -108,7 +108,7 @@ export default function ReportsPage() {
             <TrendingUpIcon className="w-5 h-5 text-red-500" />
           </div>
           <p className="text-3xl font-bold text-gray-900">
-            {formatCurrency(dailyReport?.total ?? 0)}
+            {formatCurrency((dailyReport?.total ?? 0) / 100)}
           </p>
           <p className="text-sm text-gray-500 mt-1">Receita total</p>
         </div>
@@ -128,7 +128,7 @@ export default function ReportsPage() {
             <BarChart3Icon className="w-5 h-5 text-purple-500" />
           </div>
           <p className="text-3xl font-bold text-gray-900">
-            {formatCurrency(dailyReport?.ticketMedio ?? 0)}
+            {formatCurrency((dailyReport?.ticketMedio ?? 0) / 100)}
           </p>
           <p className="text-sm text-gray-500 mt-1">Ticket médio</p>
         </div>
@@ -176,7 +176,7 @@ export default function ReportsPage() {
                       </span>
                     </td>
                     <td className="py-3 text-right font-medium text-gray-900">
-                      {formatCurrency(order.total)}
+                      {formatCurrency(order.total / 100)}
                     </td>
                   </tr>
                 ))}
