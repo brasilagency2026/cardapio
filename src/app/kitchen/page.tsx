@@ -47,12 +47,12 @@ export default function KitchenPage() {
   const updateStatus = useMutation(api.orders.updateStatus);
 
   const filteredOrders = orders?.filter(
-    (o) => filter === "ALL" || o.status === filter
+    // Na cozinha: não mostrar PENDING (aguarda confirmação do garçom)
+    (o) => o.status !== "PENDING" && (filter === "ALL" || o.status === filter)
   );
 
   async function handleNext(orderId: string, currentStatus: string) {
     const nextMap: Record<string, string> = {
-      PENDING: "ACCEPTED",
       ACCEPTED: "PREPARING",
       PREPARING: "READY",
     };
@@ -68,8 +68,7 @@ export default function KitchenPage() {
   }
 
   const counts = {
-    ALL: orders?.length ?? 0,
-    PENDING: orders?.filter((o) => o.status === "PENDING").length ?? 0,
+    ALL: orders?.filter((o) => o.status !== "PENDING").length ?? 0,
     ACCEPTED: orders?.filter((o) => o.status === "ACCEPTED").length ?? 0,
     PREPARING: orders?.filter((o) => o.status === "PREPARING").length ?? 0,
     READY: orders?.filter((o) => o.status === "READY").length ?? 0,
@@ -98,7 +97,6 @@ export default function KitchenPage() {
       <div className="px-6 py-3 bg-gray-900 border-b border-gray-800 flex gap-2 overflow-x-auto">
         {[
           { key: "ALL", label: "Todos" },
-          { key: "PENDING", label: "Novos" },
           { key: "ACCEPTED", label: "Aceitos" },
           { key: "PREPARING", label: "Preparando" },
           { key: "READY", label: "Prontos" },

@@ -58,13 +58,32 @@ export default function WaiterPage() {
   const closeTab = useMutation(api.tabs.close);
   const updateOrderStatus = useMutation(api.orders.updateStatus);
 
-  const readyOrders = activeOrders?.filter((o) => o.status === "READY") ?? [];
+  const readyOrders   = activeOrders?.filter((o) => o.status === "READY")   ?? [];
+  const pendingOrders = activeOrders?.filter((o) => o.status === "PENDING")  ?? [];
   const waitingTables = tables?.filter((t) => t.status === "WAITING_PAYMENT") ?? [];
 
   // Commandes de la table sélectionnée dans le modal détail
   const tableDetailOrders = tableDetailModal
     ? activeOrders?.filter((o) => (o as any).table?._id === tableDetailModal._id) ?? []
     : [];
+
+  async function handleConfirm(orderId: string) {
+    try {
+      await updateOrderStatus({ id: orderId as any, status: "ACCEPTED" });
+      toast.success("Pedido confirmado e enviado para a cozinha ✓");
+    } catch {
+      toast.error("Erro ao confirmar pedido");
+    }
+  }
+
+  async function handleReject(orderId: string) {
+    try {
+      await updateOrderStatus({ id: orderId as any, status: "CANCELLED" });
+      toast.success("Pedido recusado.");
+    } catch {
+      toast.error("Erro ao recusar pedido");
+    }
+  }
 
   async function handleDeliver(orderId: string) {
     try {
@@ -106,8 +125,72 @@ export default function WaiterPage() {
       </div>
 
       {/* Alertas */}
-      {(readyOrders.length > 0 || waitingTables.length > 0) && (
+      {(pendingOrders.length > 0 || readyOrders.length > 0 || waitingTables.length > 0) && (
         <div className="space-y-3">
+
+          {/* ─── Pedidos aguardando confirmação do garçom ─── */}
+          {pendingOrders.length > 0 && (
+            <div className="bg-blue-50 border border-blue-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BellIcon className="w-5 h-5 text-blue-600 animate-bounce" />
+                <span className="font-semibold text-blue-800">
+                  {pendingOrders.length} pedido{pendingOrders.length > 1 ? "s" : ""} aguardando sua confirmação
+                </span>
+              </div>
+              <div className="space-y-3">
+                {pendingOrders.map((order) => (
+                  <div key={order._id} className="bg-white rounded-xl p-4 border border-blue-100">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          Mesa {(order as any).table?.number ?? "—"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {(order as any).items?.length} iten(s) · {formatCurrency(order.total / 100)}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {Math.floor((Date.now() - order.createdAt) / 60000)} min atrás
+                      </span>
+                    </div>
+                    {/* Lista de itens */}
+                    <div className="space-y-1 mb-4">
+                      {(order as any).items?.map((item: any, i: number) => (
+                        <div key={i} className="flex items-start gap-2 text-sm">
+                          <span className="text-gray-400 font-medium w-6 shrink-0">{item.quantity}x</span>
+                          <div>
+                            <span className="text-gray-800">{item.productName}</span>
+                            {item.notes && (
+                              <p className="text-xs text-amber-600 mt-0.5">⚠ {item.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {order.notes && (
+                      <p className="text-xs text-gray-500 italic mb-3">📝 {order.notes}</p>
+                    )}
+                    {/* Botões confirmar / recusar */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleReject(order._id)}
+                        className="flex-1 py-2 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors"
+                      >
+                        Recusar
+                      </button>
+                      <button
+                        onClick={() => handleConfirm(order._id)}
+                        className="flex-1 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircleIcon className="w-4 h-4" />
+                        Confirmar e enviar à cozinha
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {readyOrders.length > 0 && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
