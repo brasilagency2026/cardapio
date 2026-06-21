@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 
 const ORDER_STATUS: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  PENDING:   { label: "Aguardando",  color: "text-blue-500",  icon: <CircleDotIcon className="w-4 h-4" /> },
-  ACCEPTED:  { label: "Aceito",      color: "text-amber-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
-  PREPARING: { label: "Preparando",  color: "text-orange-500", icon: <ChefHatIcon className="w-4 h-4" /> },
-  READY:     { label: "Pronto! 🎉",  color: "text-green-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
-  DELIVERED: { label: "Entregue",    color: "text-gray-400",  icon: <TruckIcon className="w-4 h-4" /> },
+  PENDING:   { label: "Aguardando confirmação do garçom", color: "text-blue-500",  icon: <CircleDotIcon className="w-4 h-4" /> },
+  ACCEPTED:  { label: "Confirmado — na fila da cozinha", color: "text-amber-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
+  PREPARING: { label: "Preparando",                      color: "text-orange-500", icon: <ChefHatIcon className="w-4 h-4" /> },
+  READY:     { label: "Pronto! 🎉",                      color: "text-green-500", icon: <CheckCircleIcon className="w-4 h-4" /> },
+  DELIVERED: { label: "Entregue",                        color: "text-gray-400",  icon: <TruckIcon className="w-4 h-4" /> },
 };
 
 type CartItem = {
@@ -49,6 +49,7 @@ export default function MenuPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [ordering, setOrdering] = useState(false);
+  const [orderSent, setOrderSent] = useState(false);
 
   // Queries
   const restaurant = useQuery(api.restaurants.getBySlug, { slug });
@@ -173,7 +174,8 @@ export default function MenuPage() {
 
       setCart([]);
       setCartOpen(false);
-      toast.success("Pedido enviado para a cozinha! 🎉");
+      setOrderSent(true);
+      toast.success("Pedido enviado! Um garçom passará em breve. 🛎️");
     } catch (e: any) {
       console.error("Erro ao enviar pedido:", e);
       toast.error(e?.message ?? "Erro ao enviar pedido. Tente novamente.");
@@ -250,6 +252,24 @@ export default function MenuPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4">
+        {/* Bannière confirmation pedido envoyé */}
+        {orderSent && (
+          <div className="mt-4 mb-2 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
+            <span className="text-2xl shrink-0">🛎️</span>
+            <div>
+              <p className="font-semibold text-blue-800 text-sm">Pedido recebido!</p>
+              <p className="text-blue-600 text-xs mt-0.5">
+                Um garçom passará em breve à sua mesa para confirmar o pedido antes de enviá-lo à cozinha.
+              </p>
+            </div>
+            <button
+              onClick={() => setOrderSent(false)}
+              className="shrink-0 text-blue-300 hover:text-blue-500"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         {/* Categorias */}
         {categories && categories.length > 0 && (
           <div className="flex gap-2 overflow-x-auto py-4 scrollbar-hide">
@@ -385,8 +405,11 @@ export default function MenuPage() {
               ) : (
                 <SendIcon className="w-5 h-5" />
               )}
-              {ordering ? "Enviando..." : "Enviar pedido para a cozinha"}
+              {ordering ? "Enviando..." : "Enviar pedido"}
             </button>
+            <p className="text-center text-xs text-gray-400 mt-3">
+              🛎️ Um garçom passará em breve para confirmar o seu pedido
+            </p>
           </div>
         </div>
       )}
