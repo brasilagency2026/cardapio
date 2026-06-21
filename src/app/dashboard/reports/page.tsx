@@ -10,6 +10,7 @@ import {
   ShoppingBagIcon,
   BarChart3Icon,
   CalendarIcon,
+  CreditCardIcon,
 } from "lucide-react";
 
 export default function ReportsPage() {
@@ -27,6 +28,13 @@ export default function ReportsPage() {
 
   const dailyReport = useQuery(
     api.orders.dailyReport,
+    restaurant?._id
+      ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
+      : "skip"
+  );
+
+  const dailyPayments = useQuery(
+    api.orders.dailyPayments,
     restaurant?._id
       ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
       : "skip"
@@ -132,6 +140,52 @@ export default function ReportsPage() {
           </p>
           <p className="text-sm text-gray-500 mt-1">Ticket médio</p>
         </div>
+      </div>
+
+      {/* Pagamentos por método */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCardIcon className="w-5 h-5 text-gray-500" />
+          <h2 className="text-lg font-bold text-gray-900">Pagamentos por forma</h2>
+        </div>
+        {dailyPayments && dailyPayments.totalCount > 0 ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { key: "PIX",    label: "PIX",      emoji: "📲", color: "bg-cyan-50 border-cyan-200" },
+                { key: "CREDIT", label: "Crédito",  emoji: "💳", color: "bg-blue-50 border-blue-200" },
+                { key: "DEBIT",  label: "Débito",   emoji: "💳", color: "bg-purple-50 border-purple-200" },
+                { key: "CASH",   label: "Dinheiro", emoji: "💵", color: "bg-green-50 border-green-200" },
+              ].map((m) => {
+                const data = dailyPayments.byMethod[m.key as keyof typeof dailyPayments.byMethod];
+                return (
+                  <div key={m.key} className={`border rounded-xl p-4 ${m.color}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span>{m.emoji}</span>
+                      <span className="text-sm font-medium text-gray-700">{m.label}</span>
+                    </div>
+                    <p className="text-xl font-bold text-gray-900">
+                      {formatCurrency((data?.total ?? 0) / 100)}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {data?.count ?? 0} pagamento{(data?.count ?? 0) !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+              <span className="font-semibold text-gray-700">Total recebido</span>
+              <span className="font-bold text-xl text-gray-900">
+                {formatCurrency(dailyPayments.totalPayments / 100)}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">
+            Nenhum pagamento registrado neste dia.
+          </p>
+        )}
       </div>
 
       {/* Lista de pedidos do dia */}

@@ -208,3 +208,44 @@ export const dailyReport = query({
     };
   },
 });
+
+// ─── Relatório de pagamentos por método ───────────────────────────
+export const dailyPayments = query({
+  args: {
+    restaurantId: v.id("restaurants"),
+    date: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const endOfDay = args.date + 24 * 60 * 60 * 1000;
+
+    const payments = await ctx.db
+      .query("payments")
+      .withIndex("by_restaurant_date", (q) =>
+        q.eq("restaurantId", args.restaurantId).gte("paidAt", args.date)
+      )
+      .filter((q) => q.lt(q.field("paidAt"), endOfDay))
+      .collect();
+
+    const byMethod: Record<string, { count: number; total: number }> = {
+      PIX: { count: 0, total: 0 },
+      CREDIT: { count: 0, total: 0 },
+      DEBIT: { count: 0, total: 0 },
+      CASH: { count: 0, total: 0 },
+    };
+
+    for (const p of payments) {
+      if (byMethod[p.method]) {
+        byMethod[p.method].count += 1;
+        byMethod[p.method].total += p.amount;
+      }
+    }
+
+    const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+
+    return {
+      byMethod,
+      totalPayments,
+      totalCount: payments.length,
+    };
+  },
+});
