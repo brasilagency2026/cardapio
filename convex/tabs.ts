@@ -137,13 +137,18 @@ export const listWithOrders = query({
     status: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db
+    const tabs = await ctx.db
       .query("tabs")
       .withIndex("by_restaurant", (q) =>
         q.eq("restaurantId", args.restaurantId)
-      );
-
-    const tabs = await q.collect();
+      )
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("status"), "OPEN"),
+          q.eq(q.field("status"), "WAITING_PAYMENT")
+        )
+      )
+      .collect();
 
     return await Promise.all(
       tabs.map(async (tab) => {
@@ -152,7 +157,19 @@ export const listWithOrders = query({
           .query("orders")
           .withIndex("by_tab", (q) => q.eq("tabId", tab._id))
           .collect();
-        return { ...tab, table, orders };
+
+        // Buscar itens para cada pedido
+        const ordersWithItems = await Promise.all(
+          orders.map(async (order) => {
+            const items = await ctx.db
+              .query("orderItems")
+              .withIndex("by_order", (q) => q.eq("orderId", order._id))
+              .collect();
+            return { ...order, items };
+          })
+        );
+
+        return { ...tab, table, orders: ordersWithItems };
       })
     );
   },

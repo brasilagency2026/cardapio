@@ -55,6 +55,11 @@ export default function WaiterPage() {
     restaurant?._id ? { restaurantId: restaurant._id } : "skip"
   );
 
+  const tabsWithOrders = useQuery(
+    api.tabs.listWithOrders,
+    restaurant?._id ? { restaurantId: restaurant._id } : "skip"
+  );
+
   // Notifications non lues (appels garçom)
   const notifications = useQuery(
     api.notifications.listUnread,
@@ -286,11 +291,21 @@ export default function WaiterPage() {
               </div>
               <div className="space-y-3">
                 {waitingTables.map((table) => {
-                  // Buscar pedidos desta mesa
-                  const tableOds = activeOrders?.filter(
+                  // Buscar TODOS os pedidos desta mesa (incluindo DELIVERED)
+                  // activeOrders só tem PENDING/ACCEPTED/PREPARING/READY
+                  // Para pagar, precisamos ver os DELIVERED também
+                  const allTableOrders = [...(activeOrders?.filter(
                     (o) => (o as any).table?._id === table._id && o.status !== "CANCELLED"
-                  ) ?? [];
-                  const total = tableOds.reduce((sum, o) => sum + o.total, 0);
+                  ) ?? [])];
+                  
+                  // Buscar via tabsWithTables se disponível, senão usar o que temos
+                  const tabData = tabsWithOrders?.find(t => t.table?._id === table._id && (t.status === "OPEN" || t.status === "WAITING_PAYMENT"));
+                  
+                  // Usar total da comanda (que inclui todas as commandes)
+                  const total = tabData?.total ?? allTableOrders.reduce((sum, o) => sum + o.total, 0);
+
+                  // Items de todas as commandes da comanda
+                  const tabOrders = tabData?.orders ?? allTableOrders;
 
                   return (
                     <div key={table._id} className="bg-white rounded-xl p-4 border border-amber-100">
@@ -300,7 +315,7 @@ export default function WaiterPage() {
                       </div>
                       {/* Détail des items */}
                       <div className="space-y-1 mb-3">
-                        {tableOds.map((order: any) =>
+                        {tabOrders.filter((o: any) => o.status !== "CANCELLED").map((order: any) =>
                           order.items?.map((item: any, i: number) => (
                             <div key={`${order._id}-${i}`} className="flex items-center justify-between text-sm">
                               <span className="text-gray-600">
