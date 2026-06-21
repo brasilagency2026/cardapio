@@ -160,8 +160,8 @@ export default function MenuPage() {
     );
   }
 
-  // Apenas RESTAURANT_SMART permite fazer pedidos
-  const canOrder = restaurant.plan === "RESTAURANT_SMART";
+  // Apenas RESTAURANT_SMART com número de mesa válido permite fazer pedidos
+  const canOrder = restaurant.plan === "RESTAURANT_SMART" && tableNumber > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">

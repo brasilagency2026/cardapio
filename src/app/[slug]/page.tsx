@@ -6,5 +6,6 @@ export default async function RestaurantRedirectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  redirect(`/menu/${slug}/1`);
+  // 0 = lien général (consultation uniquement, sans commande)
+  redirect(`/menu/${slug}/0`);
 }
