@@ -83,8 +83,10 @@ export default function MenuPage() {
     api.tabs.getOpenByTable,
     table?._id ? { tableId: table._id } : "skip"
   );
-  // Protection supplémentaire: ignorer si la comanda est déjà PAID/CLOSED
-  const openTab = openTabQuery && (openTabQuery.status === "OPEN" || openTabQuery.status === "WAITING_PAYMENT")
+
+  // Se a mesa está FREE, não há comanda ativa — ignora qualquer resultado da query
+  const tableIsFree = table?.status === "FREE";
+  const openTab = (!tableIsFree && openTabQuery && (openTabQuery.status === "OPEN" || openTabQuery.status === "WAITING_PAYMENT"))
     ? openTabQuery
     : null;
 
