@@ -374,31 +374,98 @@ export default function WaiterPage() {
       {/* Modal de pagamento */}
       {paymentModal && selectedTable && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h2 className="font-semibold text-lg mb-1">Registrar pagamento</h2>
-            <p className="text-sm text-gray-500 mb-4">Mesa {selectedTable.number}</p>
-            <p className="text-sm font-medium text-gray-700 mb-2">Forma de pagamento</p>
-            <div className="grid grid-cols-2 gap-2 mb-6">
-              {PAYMENT_METHODS.map((m) => (
-                <button
-                  key={m.value}
-                  onClick={() => setPaymentMethod(m.value)}
-                  className={`p-3 rounded-xl border text-sm font-medium flex items-center gap-2 transition-colors ${
-                    paymentMethod === m.value ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-600"
-                  }`}
-                >
-                  <span>{m.emoji}</span>
-                  {m.label}
-                </button>
-              ))}
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <div>
+                <h2 className="font-semibold text-gray-900 text-lg">Registrar pagamento</h2>
+                <p className="text-sm text-gray-500">Mesa {selectedTable.number}</p>
+              </div>
+              <button onClick={() => setPaymentModal(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <XIcon className="w-4 h-4" />
+              </button>
             </div>
-            <div className="flex gap-3">
-              <button onClick={() => setPaymentModal(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium">
-                Cancelar
-              </button>
-              <button onClick={handlePay} className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-medium">
-                Confirmar
-              </button>
+
+            {/* Detalhe dos pedidos da mesa */}
+            <div className="p-5 space-y-3 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Resumo do consumo</h3>
+              {(() => {
+                const orders = activeOrders?.filter(
+                  (o) => (o as any).table?._id === selectedTable._id && o.status !== "CANCELLED"
+                ) ?? [];
+                const total = orders.reduce((sum, o) => sum + o.total, 0);
+                const allItems: { name: string; qty: number; subtotal: number }[] = [];
+
+                orders.forEach((o: any) => {
+                  o.items?.forEach((item: any) => {
+                    const existing = allItems.find(i => i.name === item.productName);
+                    if (existing) {
+                      existing.qty += item.quantity;
+                      existing.subtotal += item.unitPrice * item.quantity;
+                    } else {
+                      allItems.push({
+                        name: item.productName,
+                        qty: item.quantity,
+                        subtotal: item.unitPrice * item.quantity,
+                      });
+                    }
+                  });
+                });
+
+                return (
+                  <>
+                    <div className="space-y-2">
+                      {allItems.length === 0 ? (
+                        <p className="text-sm text-gray-400">Nenhum item registrado.</p>
+                      ) : (
+                        allItems.map((item, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-700">
+                              <span className="text-gray-400 mr-1 font-medium">{item.qty}x</span>
+                              {item.name}
+                            </span>
+                            <span className="text-gray-600 font-medium">
+                              {formatCurrency(item.subtotal / 100)}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-200 mt-3">
+                      <span className="font-bold text-gray-900">Total</span>
+                      <span className="font-extrabold text-xl text-gray-900">
+                        {formatCurrency(total / 100)}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+
+            {/* Forma de pagamento */}
+            <div className="p-5">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Forma de pagamento</p>
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {PAYMENT_METHODS.map((m) => (
+                  <button
+                    key={m.value}
+                    onClick={() => setPaymentMethod(m.value)}
+                    className={`p-3 rounded-xl border text-sm font-medium flex items-center gap-2 transition-colors ${
+                      paymentMethod === m.value ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-600"
+                    }`}
+                  >
+                    <span>{m.emoji}</span>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setPaymentModal(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium">
+                  Cancelar
+                </button>
+                <button onClick={handlePay} className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-semibold">
+                  Confirmar pagamento
+                </button>
+              </div>
             </div>
           </div>
         </div>
