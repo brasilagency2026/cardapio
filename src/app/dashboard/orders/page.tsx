@@ -195,7 +195,7 @@ export default function OrdersPage() {
                         {item.productName}
                       </span>
                       <span className="text-gray-500">
-                        {formatCurrency(item.subtotal)}
+                        {formatCurrency(item.subtotal / 100)}
                       </span>
                     </div>
                   ))}
@@ -210,7 +210,7 @@ export default function OrdersPage() {
 
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-gray-900">
-                  Total: {formatCurrency(order.total)}
+                  Total: {formatCurrency(order.total / 100)}
                 </p>
                 <div className="flex gap-2">
                   {order.status !== "DELIVERED" &&
