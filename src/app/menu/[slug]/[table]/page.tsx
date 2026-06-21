@@ -50,6 +50,8 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [ordering, setOrdering] = useState(false);
   const [orderSent, setOrderSent] = useState(false);
+  const [callingWaiter, setCallingWaiter] = useState(false);
+  const [waiterCalled, setWaiterCalled] = useState(false);
 
   // Queries
   const restaurant = useQuery(api.restaurants.getBySlug, { slug });
@@ -92,6 +94,7 @@ export default function MenuPage() {
   const openTabMutation = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
   const getOrCreateTable = useMutation(api.tables.getOrCreate);
+  const requestPayment = useMutation(api.tabs.requestPayment);
 
   const filteredProducts = products?.filter((p) => {
     if (!p.available) return false;
@@ -479,6 +482,55 @@ export default function MenuPage() {
                     </div>
                   );
                 })}
+
+                {/* Total geral + botão chamar garçom */}
+                {(() => {
+                  const orders = tableOrders.filter(o => o.tabId === openTab._id && o.status !== "CANCELLED");
+                  const totalGeral = orders.reduce((sum, o) => sum + o.total, 0);
+                  return (
+                    <div className="border-t-2 border-gray-200 pt-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-gray-900">Total geral</span>
+                        <span className="font-extrabold text-xl text-gray-900">
+                          {formatCurrency(totalGeral / 100)}
+                        </span>
+                      </div>
+
+                      {waiterCalled ? (
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                          <p className="text-2xl mb-1">🛎️</p>
+                          <p className="font-semibold text-amber-800 text-sm">Garçom chamado!</p>
+                          <p className="text-xs text-amber-600 mt-1">Ele passará em breve para realizar o pagamento.</p>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            if (!openTab?._id || !table?._id) return;
+                            setCallingWaiter(true);
+                            try {
+                              await requestPayment({ id: openTab._id as any, tableId: table._id as any });
+                              setWaiterCalled(true);
+                              toast.success("Garçom chamado! 🛎️");
+                            } catch {
+                              toast.error("Erro ao chamar garçom");
+                            } finally {
+                              setCallingWaiter(false);
+                            }
+                          }}
+                          disabled={callingWaiter}
+                          className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
+                        >
+                          {callingWaiter ? (
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <span className="text-xl">🛎️</span>
+                          )}
+                          {callingWaiter ? "Chamando..." : "Chamar garçom para pagar"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
