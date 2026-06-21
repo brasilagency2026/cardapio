@@ -108,7 +108,10 @@ export default function MenuPage() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   async function handleOrder() {
-    if (!restaurant?._id || !table?._id || cart.length === 0) return;
+    if (!restaurant?._id || !table?._id || cart.length === 0) {
+      if (!table?._id) toast.error("Mesa não encontrada. Verifique o número da mesa.");
+      return;
+    }
     setOrdering(true);
     try {
       // Abrir/obter comanda
@@ -134,8 +137,9 @@ export default function MenuPage() {
       setCart([]);
       setCartOpen(false);
       toast.success("Pedido enviado para a cozinha! 🎉");
-    } catch (e) {
-      toast.error("Erro ao enviar pedido. Tente novamente.");
+    } catch (e: any) {
+      console.error("Erro ao enviar pedido:", e);
+      toast.error(e?.message ?? "Erro ao enviar pedido. Tente novamente.");
     } finally {
       setOrdering(false);
     }
