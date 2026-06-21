@@ -15,9 +15,14 @@ import {
 
 export default function ReportsPage() {
   const { organization, isLoaded: isOrgLoaded } = useOrganization();
-  const [selectedDate, setSelectedDate] = useState(() => {
+  const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    return today;
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
     return today;
   });
 
@@ -26,36 +31,33 @@ export default function ReportsPage() {
     organization?.id ? { clerkOrgId: organization.id } : "skip"
   );
 
+  const endTimestamp = new Date(endDate);
+  endTimestamp.setHours(23, 59, 59, 999);
+
   const dailyReport = useQuery(
     api.orders.dailyReport,
     restaurant?._id
-      ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
+      ? { restaurantId: restaurant._id, date: startDate.getTime(), endDate: endTimestamp.getTime() }
       : "skip"
   );
 
   const dailyPayments = useQuery(
     api.orders.dailyPayments,
     restaurant?._id
-      ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
+      ? { restaurantId: restaurant._id, date: startDate.getTime(), endDate: endTimestamp.getTime() }
       : "skip"
   );
 
   const topItems = useQuery(
     api.orders.dailyTopItems,
     restaurant?._id
-      ? { restaurantId: restaurant._id, date: selectedDate.getTime() }
+      ? { restaurantId: restaurant._id, date: startDate.getTime(), endDate: endTimestamp.getTime() }
       : "skip"
   );
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value + "T00:00:00");
-    date.setHours(0, 0, 0, 0);
-    setSelectedDate(date);
-  };
-
-  const dateString = selectedDate.toISOString().split("T")[0];
-  const isToday =
-    selectedDate.toDateString() === new Date().toDateString();
+  const startString = startDate.toISOString().split("T")[0];
+  const endString = endDate.toISOString().split("T")[0];
+  const isSameDay = startString === endString;
 
   const isLoading = !isOrgLoaded || (organization?.id && restaurant === undefined);
 
@@ -92,26 +94,42 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Seletor de data */}
+      {/* Seletor de período */}
       <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-gray-500" />
-          <input
-            type="date"
-            value={dateString}
-            onChange={handleDateChange}
-            max={new Date().toISOString().split("T")[0]}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-          />
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-500">De</label>
+            <input
+              type="date"
+              value={startString}
+              onChange={(e) => {
+                const d = new Date(e.target.value + "T00:00:00");
+                d.setHours(0, 0, 0, 0);
+                setStartDate(d);
+              }}
+              max={new Date().toISOString().split("T")[0]}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-500">Até</label>
+            <input
+              type="date"
+              value={endString}
+              onChange={(e) => {
+                const d = new Date(e.target.value + "T00:00:00");
+                d.setHours(23, 59, 59, 999);
+                setEndDate(d);
+              }}
+              max={new Date().toISOString().split("T")[0]}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+            />
+          </div>
           <span className="text-sm text-gray-500">
-            {isToday
-              ? "Hoje"
-              : selectedDate.toLocaleDateString("pt-BR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
+            {isSameDay
+              ? startDate.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+              : `${startDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} – ${endDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })}`}
           </span>
         </div>
       </div>

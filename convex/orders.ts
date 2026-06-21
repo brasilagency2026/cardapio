@@ -179,19 +179,21 @@ export const listByTable = query({
 export const dailyReport = query({
   args: {
     restaurantId: v.id("restaurants"),
-    date: v.number(), // timestamp início do dia
+    date: v.number(),
+    endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const endOfDay = args.date + 24 * 60 * 60 * 1000;
+    const startDate = args.date;
+    const endDate = args.endDate ?? (args.date + 24 * 60 * 60 * 1000);
 
     const orders = await ctx.db
       .query("orders")
       .withIndex("by_restaurant_date", (q) =>
-        q.eq("restaurantId", args.restaurantId).gte("createdAt", args.date)
+        q.eq("restaurantId", args.restaurantId).gte("createdAt", startDate)
       )
       .filter((q) =>
         q.and(
-          q.lt(q.field("createdAt"), endOfDay),
+          q.lt(q.field("createdAt"), endDate),
           q.neq(q.field("status"), "CANCELLED")
         )
       )
@@ -225,16 +227,18 @@ export const dailyPayments = query({
   args: {
     restaurantId: v.id("restaurants"),
     date: v.number(),
+    endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const endOfDay = args.date + 24 * 60 * 60 * 1000;
+    const startDate = args.date;
+    const endDate = args.endDate ?? (args.date + 24 * 60 * 60 * 1000);
 
     const payments = await ctx.db
       .query("payments")
       .withIndex("by_restaurant_date", (q) =>
-        q.eq("restaurantId", args.restaurantId).gte("paidAt", args.date)
+        q.eq("restaurantId", args.restaurantId).gte("paidAt", startDate)
       )
-      .filter((q) => q.lt(q.field("paidAt"), endOfDay))
+      .filter((q) => q.lt(q.field("paidAt"), endDate))
       .collect();
 
     const byMethod: Record<string, { count: number; total: number }> = {
@@ -266,18 +270,20 @@ export const dailyTopItems = query({
   args: {
     restaurantId: v.id("restaurants"),
     date: v.number(),
+    endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const endOfDay = args.date + 24 * 60 * 60 * 1000;
+    const startDate = args.date;
+    const endDate = args.endDate ?? (args.date + 24 * 60 * 60 * 1000);
 
     const orders = await ctx.db
       .query("orders")
       .withIndex("by_restaurant_date", (q) =>
-        q.eq("restaurantId", args.restaurantId).gte("createdAt", args.date)
+        q.eq("restaurantId", args.restaurantId).gte("createdAt", startDate)
       )
       .filter((q) =>
         q.and(
-          q.lt(q.field("createdAt"), endOfDay),
+          q.lt(q.field("createdAt"), endDate),
           q.neq(q.field("status"), "CANCELLED")
         )
       )
