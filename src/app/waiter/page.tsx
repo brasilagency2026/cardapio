@@ -16,6 +16,7 @@ import {
   PackageIcon,
   ClockIcon,
 } from "lucide-react";
+import { useAlertSound } from "@/hooks/useAlertSound";
 
 const PAYMENT_METHODS = [
   { value: "PIX", label: "PIX", emoji: "📲" },
@@ -73,6 +74,9 @@ export default function WaiterPage() {
   const waiterCalls = notifications?.filter(
     (n) => n.message.includes("chamando o garçom")
   ) ?? [];
+
+  // ─── Alertes sonores ───────────────────────────────────────────
+  useAlertSound(waiterCalls.length + pendingOrders.length + readyOrders.length, true);
 
   // Commandes de la table sélectionnée dans le modal détail
   const tableDetailOrders = tableDetailModal

@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { ClockIcon, ChefHatIcon, CheckIcon, PlayIcon } from "lucide-react";
+import { useAlertSound } from "@/hooks/useAlertSound";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Novo Pedido",
@@ -73,6 +74,9 @@ export default function KitchenPage() {
     PREPARING: orders?.filter((o) => o.status === "PREPARING").length ?? 0,
     READY: orders?.filter((o) => o.status === "READY").length ?? 0,
   };
+
+  // ─── Alerte sonore quand nouveau pedido arrive (ACCEPTED) ─────
+  useAlertSound(counts.ACCEPTED, true);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
