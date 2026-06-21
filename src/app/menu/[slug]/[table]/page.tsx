@@ -78,11 +78,15 @@ export default function MenuPage() {
     table?._id ? { tableId: table._id } : "skip"
   );
 
-  // Comanda ativa (OPEN) da mesa
-  const openTab = useQuery(
+  // Comanda ativa (OPEN ou WAITING_PAYMENT) da mesa
+  const openTabQuery = useQuery(
     api.tabs.getOpenByTable,
     table?._id ? { tableId: table._id } : "skip"
   );
+  // Protection supplémentaire: ignorer si la comanda est déjà PAID/CLOSED
+  const openTab = openTabQuery && (openTabQuery.status === "OPEN" || openTabQuery.status === "WAITING_PAYMENT")
+    ? openTabQuery
+    : null;
 
   // Só mostrar pedidos da comanda ativa — quando a mesa é liberada, openTab será null
   const activeTableOrders = openTab
