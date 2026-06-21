@@ -284,19 +284,46 @@ export default function WaiterPage() {
                   {waitingTables.length} mesa{waitingTables.length > 1 ? "s" : ""} aguardando pagamento
                 </span>
               </div>
-              <div className="space-y-2">
-                {waitingTables.map((table) => (
-                  <div key={table._id} className="flex items-center justify-between bg-white rounded-lg p-3">
-                    <p className="font-medium text-gray-800">Mesa {table.number}</p>
-                    <button
-                      onClick={() => { setSelectedTable(table); setPaymentModal(true); }}
-                      className="flex items-center gap-1.5 bg-amber-500 text-white text-sm px-3 py-1.5 rounded-lg"
-                    >
-                      <CreditCardIcon className="w-4 h-4" />
-                      Receber pagamento
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {waitingTables.map((table) => {
+                  // Buscar pedidos desta mesa
+                  const tableOds = activeOrders?.filter(
+                    (o) => (o as any).table?._id === table._id && o.status !== "CANCELLED"
+                  ) ?? [];
+                  const total = tableOds.reduce((sum, o) => sum + o.total, 0);
+
+                  return (
+                    <div key={table._id} className="bg-white rounded-xl p-4 border border-amber-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="font-semibold text-gray-800">Mesa {table.number}</p>
+                        <span className="font-bold text-gray-900">{formatCurrency(total / 100)}</span>
+                      </div>
+                      {/* Détail des items */}
+                      <div className="space-y-1 mb-3">
+                        {tableOds.map((order: any) =>
+                          order.items?.map((item: any, i: number) => (
+                            <div key={`${order._id}-${i}`} className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600">
+                                <span className="text-gray-400 mr-1">{item.quantity}x</span>
+                                {item.productName}
+                              </span>
+                              <span className="text-gray-500 text-xs">
+                                {formatCurrency((item.unitPrice * item.quantity) / 100)}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <button
+                        onClick={() => { setSelectedTable(table); setPaymentModal(true); }}
+                        className="w-full flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm py-2.5 rounded-xl font-medium transition-colors"
+                      >
+                        <CreditCardIcon className="w-4 h-4" />
+                        Receber pagamento — {formatCurrency(total / 100)}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
