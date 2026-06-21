@@ -15,10 +15,10 @@ export const open = mutation({
       .filter((q) => q.eq(q.field("status"), "OPEN"))
       .first();
 
-    if (existing) return existing._id;
-
-    // Marcar mesa como ocupada
+    // Sempre marcar mesa como ocupada
     await ctx.db.patch(args.tableId, { status: "OCCUPIED" });
+
+    if (existing) return existing._id;
 
     return await ctx.db.insert("tabs", {
       restaurantId: args.restaurantId,
