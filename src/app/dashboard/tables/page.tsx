@@ -11,6 +11,8 @@ import {
   QrCodeIcon,
   Trash2Icon,
   UsersIcon,
+  LinkIcon,
+  CopyIcon,
 } from "lucide-react";
 import { TableStatusBadge } from "@/components/shared/table-status-badge";
 import QRCode from "qrcode";
@@ -229,22 +231,48 @@ export default function TablesPage() {
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleDownloadQr(table.number)}
-                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <QrCodeIcon className="w-4 h-4" />
-                    QR Code
-                  </button>
-                  {table.status !== "FREE" && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => handleFreeTable(table._id)}
-                      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600 transition-colors"
+                      onClick={() => handleDownloadQr(table.number)}
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      Liberar
+                      <QrCodeIcon className="w-4 h-4" />
+                      QR Code
                     </button>
-                  )}
+                    {table.status !== "FREE" && (
+                      <button
+                        onClick={() => handleFreeTable(table._id)}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600 transition-colors"
+                      >
+                        Liberar
+                      </button>
+                    )}
+                  </div>
+                  {/* Lien direct cliquable + copie */}
+                  <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                    <LinkIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <a
+                      href={`https://cardapio.foodpronto.com.br/menu/${restaurant.slug}/${table.number}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-red-500 hover:underline truncate flex-1"
+                    >
+                      /menu/{restaurant.slug}/{table.number}
+                    </a>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `https://cardapio.foodpronto.com.br/menu/${restaurant.slug}/${table.number}`
+                        );
+                        toast.success("Link copiado!");
+                      }}
+                      className="shrink-0 text-gray-400 hover:text-gray-600"
+                      title="Copiar link"
+                    >
+                      <CopyIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
