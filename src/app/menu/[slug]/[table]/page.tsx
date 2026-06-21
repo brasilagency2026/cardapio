@@ -57,6 +57,7 @@ export default function MenuPage() {
 
   const openTab = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
+  const getOrCreateTable = useMutation(api.tables.getOrCreate);
 
   const filteredProducts = products?.filter((p) => {
     if (!p.available) return false;
@@ -108,22 +109,25 @@ export default function MenuPage() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   async function handleOrder() {
-    if (!restaurant?._id || !table?._id || cart.length === 0) {
-      if (!table?._id) toast.error("Mesa não encontrada. Verifique o número da mesa.");
-      return;
-    }
+    if (!restaurant?._id || cart.length === 0) return;
     setOrdering(true);
     try {
+      // Obter ou criar a mesa automaticamente
+      const tableId = await getOrCreateTable({
+        restaurantId: restaurant._id,
+        number: tableNumber,
+      });
+
       // Abrir/obter comanda
       const tabId = await openTab({
         restaurantId: restaurant._id,
-        tableId: table._id,
+        tableId,
       });
 
       // Criar pedido
       await createOrder({
         restaurantId: restaurant._id,
-        tableId: table._id,
+        tableId,
         tabId,
         items: cart.map((i) => ({
           productId: i.productId as any,

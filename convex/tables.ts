@@ -28,6 +28,34 @@ export const getByNumber = query({
   },
 });
 
+// ─── Buscar ou criar mesa automaticamente ────────────────────────
+export const getOrCreate = mutation({
+  args: { restaurantId: v.id("restaurants"), number: v.number() },
+  handler: async (ctx, args) => {
+    // Verificar se já existe
+    const existing = await ctx.db
+      .query("tables")
+      .withIndex("by_restaurant_number", (q) =>
+        q.eq("restaurantId", args.restaurantId).eq("number", args.number)
+      )
+      .first();
+
+    if (existing) return existing._id;
+
+    // Criar automaticamente
+    const tableId = await ctx.db.insert("tables", {
+      restaurantId: args.restaurantId,
+      name: `Mesa ${args.number}`,
+      number: args.number,
+      status: "FREE",
+      qrCodeUrl: `https://cardapio.foodpronto.com.br/menu/${args.number}`,
+      createdAt: Date.now(),
+    });
+
+    return tableId;
+  },
+});
+
 // ─── Criar mesa ───────────────────────────────────────────────────
 export const create = mutation({
   args: {
