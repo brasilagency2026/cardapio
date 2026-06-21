@@ -52,9 +52,6 @@ export default function MenuPage() {
   const [orderSent, setOrderSent] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
 
-  // waiterCalled basé sur le statut réel de la comanda (pas un state local)
-  const waiterCalled = openTab?.status === "WAITING_PAYMENT";
-
   // Queries
   const restaurant = useQuery(api.restaurants.getBySlug, { slug });
   const categories = useQuery(
@@ -98,6 +95,9 @@ export default function MenuPage() {
         (o) => o.tabId === openTab._id && !["DELIVERED", "CANCELLED"].includes(o.status)
       ) ?? [])
     : [];
+
+  // waiterCalled basé sur le statut réel de la comanda
+  const waiterCalled = openTab?.status === "WAITING_PAYMENT";
 
   const openTabMutation = useMutation(api.tabs.open);
   const createOrder = useMutation(api.orders.create);
