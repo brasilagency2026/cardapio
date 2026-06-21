@@ -264,6 +264,7 @@ export default function TrabalheConoscoPage() {
           <Link href="/contato" className="hover:text-neutral-300 transition-colors">Contato</Link>
           <Link href="/termos" className="hover:text-neutral-300 transition-colors">Termos</Link>
           <Link href="/privacidade" className="hover:text-neutral-300 transition-colors">Privacidade</Link>
+          <Link href="/trabalhe-conosco" className="hover:text-neutral-300 transition-colors">Trabalhe Conosco</Link>
         </nav>
         <p className="text-xs text-neutral-600">&copy; {new Date().getFullYear()} Cardápio Foodpronto. Todos os direitos reservados.</p>
         <p className="text-xs text-neutral-700 mt-1">CNPJ 64.465.357/0001-28</p>
