@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ptBR } from "@clerk/localizations";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { Toaster } from "sonner";
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -56,6 +57,20 @@ export default function RootLayout({
       }}
     >
       <html lang="pt-BR">
+        <head>
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-SWXR14S8Z6"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-SWXR14S8Z6');
+            `}
+          </Script>
+        </head>
         <body className={inter.className}>
           <ConvexClientProvider>
             {children}
