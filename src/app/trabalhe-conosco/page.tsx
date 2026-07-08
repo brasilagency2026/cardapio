@@ -12,11 +12,12 @@ import {
   SendIcon,
   MessageCircleIcon,
   ChevronDownIcon,
+  Percent,
 } from "lucide-react";
 
 const PLANS = [
-  { name: "Cardápio Digital", price: 40, commission: 20 },
-  { name: "Gestão Completa", price: 89, commission: 44.5 },
+  { name: "Cardápio Digital", originalPrice: 40, price: 36, commission: 18 },
+  { name: "Gestão Completa", originalPrice: 89, price: 80.1, commission: 40.05 },
 ];
 
 export default function TrabalheConoscoPage() {
@@ -58,8 +59,8 @@ export default function TrabalheConoscoPage() {
           </span>
         </h1>
 
-        <p className="text-lg text-neutral-400 max-w-xl mx-auto mb-10">
-          Seja nosso parceiro comercial. Indique restaurantes e ganhe comissão recorrente a cada cliente que assinar.
+        <p className="text-lg text-neutral-400 max-w-2xl mx-auto mb-10">
+          Seja nosso parceiro comercial. Indique restaurantes oferecendo um cupom exclusivo de 10% de desconto e ganhe comissão recorrente de 50% todo mês sobre a assinatura.
         </p>
 
         <a
@@ -75,11 +76,12 @@ export default function TrabalheConoscoPage() {
 
       {/* Vantagens */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid sm:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {[
-            { icon: <DollarSignIcon className="w-6 h-6 text-green-400" />, title: "50% de comissão", desc: "Ganhe metade do valor da assinatura, todo mês, enquanto o cliente permanecer ativo." },
-            { icon: <UsersIcon className="w-6 h-6 text-green-400" />, title: "Sem limite de indicações", desc: "Indique quantos restaurantes quiser. Quanto mais indicar, mais ganha." },
-            { icon: <TrendingUpIcon className="w-6 h-6 text-green-400" />, title: "Renda recorrente", desc: "Não é uma venda única. Você recebe comissão todos os meses, de forma passiva." },
+            { icon: <DollarSignIcon className="w-6 h-6 text-green-400" />, title: "50% de comissão", desc: "Ganhe metade do valor pago pelo cliente na assinatura mensal, de forma recorrente." },
+            { icon: <Percent className="w-6 h-6 text-green-400" />, title: "Desconto para Clientes", desc: "Seu cliente ganha 10% de desconto vitalício. Um forte argumento, já que no site o valor é cheio!" },
+            { icon: <UsersIcon className="w-6 h-6 text-green-400" />, title: "Sem limite", desc: "Indique quantos restaurantes quiser. Quanto mais indicar, maiores serão seus ganhos." },
+            { icon: <TrendingUpIcon className="w-6 h-6 text-green-400" />, title: "Renda recorrente", desc: "Crie uma carteira de clientes ativos e garanta comissões caindo em sua conta todo mês." },
           ].map((v) => (
             <div key={v.title} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
               <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
@@ -101,18 +103,22 @@ export default function TrabalheConoscoPage() {
           </p>
 
           {/* Seletor de plano */}
-          <div className="flex justify-center gap-3 mb-8">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-8">
             {PLANS.map((p, i) => (
               <button
                 key={p.name}
                 onClick={() => setSelectedPlan(i)}
-                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-5 py-3 rounded-2xl text-sm font-medium transition-all flex flex-col items-center border ${
                   selectedPlan === i
-                    ? "bg-green-500 text-white"
-                    : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700"
+                    ? "bg-green-500 border-green-400 text-white shadow-lg shadow-green-500/20"
+                    : "bg-neutral-800 border-neutral-700 text-neutral-400 hover:bg-neutral-700"
                 }`}
               >
-                {p.name} · R${p.price}/mês
+                <span className="font-bold text-base">{p.name}</span>
+                <span className="text-xs mt-1 opacity-90">
+                  Assinatura: <span className="line-through">R$ {p.originalPrice}</span>{" "}
+                  <strong className="text-white font-extrabold">R$ {p.price.toFixed(2).replace('.', ',')}</strong>/mês (10% OFF)
+                </span>
               </button>
             ))}
           </div>
@@ -142,14 +148,14 @@ export default function TrabalheConoscoPage() {
             <div className="text-3xl text-neutral-600">·</div>
             <div>
               <p className="text-5xl font-extrabold text-green-400">
-                R$ {monthlyEarning.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}
+                R$ {monthlyEarning.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-neutral-500 text-sm mt-1">por mês</p>
+              <p className="text-neutral-500 text-sm mt-1">por mês em comissões</p>
             </div>
           </div>
 
-          <p className="text-center text-xs text-neutral-600 mt-4">
-            Comissão de R${plan.commission.toFixed(2)} por cliente/mês (50% de R${plan.price})
+          <p className="text-center text-xs text-neutral-500 mt-4">
+            Você ganha <strong className="text-white">R$ {plan.commission.toFixed(2).replace('.', ',')}</strong> por cliente/mês (50% do valor da mensalidade de R$ {plan.price.toFixed(2).replace('.', ',')})
           </p>
         </div>
 
@@ -159,15 +165,14 @@ export default function TrabalheConoscoPage() {
             <CheckCircleIcon className="w-5 h-5 text-green-400" />
           </div>
           <div>
-            <h3 className="text-white font-bold mb-1">Parceria formal sem contrato de exclusividade</h3>
+            <h3 className="text-white font-bold mb-1">Parceria ganha-ganha para você e seu cliente</h3>
             <p className="text-neutral-400 text-sm leading-relaxed">
-              Você recebe um link de afiliado e um código único. A cada restaurante que se inscrever com seu código,
-              você ganha 50% do valor da assinatura mensal. Pagamentos via <strong className="text-white">PIX</strong> todo dia 5.
+              Você recebe um link de afiliado e um cupom exclusivo de 10% de desconto para os seus clientes. Ao usar seu código, seu cliente ganha desconto vitalício e você garante 50% de comissão recorrente sobre o valor pago. Pagamentos via <strong className="text-white">PIX</strong> todo dia 5.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
+              <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">✓ 10% de desconto vitalício para o cliente</span>
+              <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">✓ 50% de comissão recorrente para você</span>
               <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">✓ Sem investimento inicial</span>
-              <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">✓ Trabalhe de qualquer lugar</span>
-              <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">✓ Sem horário fixo</span>
             </div>
           </div>
         </div>
@@ -177,10 +182,10 @@ export default function TrabalheConoscoPage() {
           <h2 className="text-3xl font-extrabold text-center text-white mb-10">Como funciona?</h2>
           <div className="space-y-4 max-w-2xl mx-auto">
             {[
-              { step: "1", title: "Fale com a gente", desc: "Entre em contato pelo WhatsApp e receba seu código de afiliado." },
-              { step: "2", title: "Indique restaurantes", desc: "Visite bares, restaurantes e food trucks na sua cidade e apresente o Foodpronto." },
-              { step: "3", title: "O cliente se inscreve", desc: "Quando ele se cadastra usando seu código, a comissão é vinculada automaticamente." },
-              { step: "4", title: "Ganhe todo mês", desc: "Enquanto o cliente pagar a assinatura, você recebe 50% do valor via PIX." },
+              { step: "1", title: "Fale com a gente", desc: "Entre em contato pelo WhatsApp e receba seu link e cupom exclusivo de 10% de desconto." },
+              { step: "2", title: "Apresente o benefício", desc: "Visite restaurantes e apresente o Foodpronto. Mostre que assinando com seu código eles ganham 10% de desconto vitalício (uma vantagem exclusiva que não existe pelo site)." },
+              { step: "3", title: "O cliente se inscreve", desc: "Quando ele se cadastrar com seu link ou cupom, o desconto é aplicado e a comissão é vinculada automaticamente." },
+              { step: "4", title: "Receba todo mês", desc: "A cada mensalidade paga pelo cliente com desconto, você recebe 50% do valor via PIX todo dia 5." },
             ].map((s) => (
               <div key={s.step} className="flex items-start gap-4 bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
                 <div className="w-9 h-9 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center text-sm font-bold shrink-0">
@@ -204,7 +209,8 @@ export default function TrabalheConoscoPage() {
               { q: "Quando recebo minha comissão?", a: "Todo dia 5 do mês seguinte, via PIX. Se o dia 5 cair em fim de semana, o pagamento é feito no próximo dia útil." },
               { q: "E se o cliente cancelar?", a: "Enquanto o cliente estiver com assinatura ativa, você recebe. Se cancelar, a comissão para naquele mês." },
               { q: "Posso indicar de qualquer cidade?", a: "Sim! O Foodpronto funciona em todo o Brasil. Indique restaurantes de qualquer lugar." },
-              { q: "Qual é a comissão por plano?", a: "Cardápio Digital (R$40/mês): você ganha R$20/mês por cliente. Gestão Completa (R$89/mês): você ganha R$44,50/mês por cliente." },
+              { q: "Qual é a comissão por plano e o desconto do cliente?", a: "Com o seu cupom de 10% de desconto, os valores ficam mais atrativos para os clientes e você ganha 50% de comissão sobre a assinatura. Para o plano Cardápio Digital: o cliente paga R$ 36,00/mês (desconto de 10%) e você recebe R$ 18,00/mês de comissão recorrente. Para o plano Gestão Completa: o cliente paga R$ 80,10/mês (desconto de 10%) e você recebe R$ 40,05/mês de comissão recorrente." },
+              { q: "Por que o cliente deve assinar comigo e não direto pelo site?", a: "Porque você oferece um benefício exclusivo! Assinando diretamente pelo site, o cliente paga o valor cheio dos planos (R$ 40,00 ou R$ 89,00/mês). Com o seu código ou link de afiliado, ele garante um voucher de 10% de desconto vitalício nas mensalidades (pagando R$ 36,00 ou R$ 80,10/mês)." },
               { q: "Preciso ter experiência em vendas?", a: "Não necessariamente. Oferecemos material de apoio e dicas para abordar restaurantes." },
             ].map((item, i) => (
               <div
